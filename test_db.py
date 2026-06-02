@@ -1,16 +1,15 @@
-import psycopg2, os
-from dotenv import load_dotenv, dotenv_values
+from taskflow.app.users.repositories.users import create_user, get_user_by_id
 
-load_dotenv()
+# user = create_user(
+#     username="fardad",
+#     email="fardad@test.com",
+#     password="fardad123"
+# )
 
-conn = psycopg2.connect(
-    f"dbname={os.getenv("db_name")} user={os.getenv("user")} password={os.getenv("password")} port={os.getenv("port")}"
+# print("user has created successfully!")
+
+get_user = get_user_by_id(
+    user_id="1"
 )
 
-cur = conn.cursor()
-
-cur.execute("select * from users")
-
-print(cur.fetchall())
-
-conn.close()
+print("here is", get_user)
