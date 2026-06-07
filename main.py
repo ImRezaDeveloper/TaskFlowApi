@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from taskflow.app.users.user_routes import router
+from passlib.context import CryptContext
+
+# psw
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI(
     title="TaskFlow API",
