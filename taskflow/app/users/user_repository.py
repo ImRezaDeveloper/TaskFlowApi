@@ -17,7 +17,7 @@ def get_users():
 
     return users
 
-def create_user(username: str, email: str, password_hash: str):
+def create_user_db(username: str, email: str, password_hash: str):
     conn = get_db()
     cur = conn.cursor()
 
@@ -89,3 +89,20 @@ def delete_user(user_id: int):
     conn.close()
 
     return deleted
+
+def get_user_by_email(email: str):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, username, email
+        FROM users
+        WHERE email = %s
+    """, (email,))
+
+    user = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return user
