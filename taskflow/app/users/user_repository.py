@@ -2,7 +2,7 @@ import psycopg2
 
 from taskflow.app.db.db import get_db
 
-def get_users():
+def get_users_db():
     conn = get_db()
     cur = conn.cursor()
 
@@ -52,7 +52,7 @@ def get_user_by_id(user_id: int):
 
     return user
 
-def update_user(user_id: int, username: str, email: str):
+def update_user_db(user_id: int, username: str, email: str):
     conn = get_db()
     cur = conn.cursor()
 
@@ -72,7 +72,7 @@ def update_user(user_id: int, username: str, email: str):
 
     return user
 
-def delete_user(user_id: int):
+def delete_user_db(user_id: int):
     conn = get_db()
     cur = conn.cursor()
 
