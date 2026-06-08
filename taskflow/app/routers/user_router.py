@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import APIRouter, HTTPException
 from starlette import status
-from taskflow.app.users.user_schema import UserCreate
-from taskflow.app.users.user_service import get_user_by_id as get_user_id
-from taskflow.app.users.user_service import create_user, hash_password
-from taskflow.app.users.user_service import update_user, delete_user, get_users, create_user
+from taskflow.app.schema.user_schema import UserCreate
+from taskflow.app.service.user_service import get_user_by_id as get_user_id
+from taskflow.app.service.user_service import create_user, hash_password
+from taskflow.app.service.user_service import update_user, delete_user, get_users, create_user
 
 
 
