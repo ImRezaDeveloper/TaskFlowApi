@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 from taskflow.app.schema.user_schema import UserCreate
 from taskflow.app.service.user_service import get_user_by_id as get_user_id
-from taskflow.app.service.user_service import create_user, hash_password
+from taskflow.app.service.user_service import create_user, hash_pwd
 from taskflow.app.service.user_service import update_user, delete_user, get_users, create_user
 
 
@@ -26,7 +26,7 @@ def add_user(user: UserCreate):
     return create_user(
         username=user.username,
         email=user.email,
-        password_hash = hash_password(user.password)
+        password_hash = hash_pwd(user.password)
     )
 
 @router.put("/{user_id}", status_code=status.HTTP_200_OK)

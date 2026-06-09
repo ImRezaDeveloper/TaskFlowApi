@@ -17,6 +17,24 @@ def get_users_db():
 
     return users
 
+def verify_exists_user(email: str):
+    
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, username, email
+        FROM users
+        WHERE email = %s
+    """, (email,))
+
+    user = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return user
+
 def create_user_db(username: str, email: str, password_hash: str):
     conn = get_db()
     cur = conn.cursor()

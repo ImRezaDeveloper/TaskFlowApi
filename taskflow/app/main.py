@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from taskflow.app.routers.user_router import router
+from taskflow.app.api.v1.endpints.user_router import router
+from taskflow.app.api.v1.endpints.auth_router import router
 from passlib.context import CryptContext
 
 # psw
@@ -13,6 +14,7 @@ app = FastAPI(
 )
 
 app.include_router(router)
+
 
 app.add_middleware(
     CORSMiddleware,

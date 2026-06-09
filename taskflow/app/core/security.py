@@ -1,12 +1,8 @@
-import bcrypt
-from pwdlib import PasswordHash
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-password_hash = PasswordHash.recommended()
+def hash_pwd(plainPassword: str):
+    return pwd_context.hash(plainPassword)
 
-
-def hash_password(password: str) -> str:
-    return password_hash.hash(password)
-
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    return password_hash.verify(password, hashed_password)
+def verify_pwd(plainPassword: str, hashedPassword: str) -> bool:
+    return pwd_context.verify(plainPassword, hashedPassword)

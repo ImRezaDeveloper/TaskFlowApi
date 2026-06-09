@@ -1,22 +1,22 @@
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import select
-from app.security.auth.hashing import hash_pwd, verify_pwd
-from taskflow.app.core.jwt_handler import create_access_token
+from taskflow.app.core.security import hash_pwd, verify_pwd
+from taskflow.app.security.auth.jwt_handler import create_access_token
 from app.core.config import settings
-from app.dependencies import get_db
-from app.schemas.user_schemas import Token, UserUpdate, UserDisplay
+from taskflow.app.api.dependencies import get_db
+from taskflow.app.schema.user_schema import Token, TokenData
 from app.models.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends, HTTPException
 from fastapi import APIRouter
+from taskflow.app.crud.user_repository import verify_exists_user
 
 router = APIRouter(tags=['auth'], prefix='/auth')
 
 
 @router.post('/login', response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
-    user = select(User).where(User.email == form_data.username)
+    user = verify_exists_user(email) # email
     result = await db.execute(user)
     final = result.scalars().first()
     
