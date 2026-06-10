@@ -21,11 +21,3 @@ class UserDisplay(BaseModel):
 
     class Config:
         from_attributes = True
-        
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-# Optional Field
-class TokenData(BaseModel):
-    user_id: Optional[int] = None

@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import HTTPException
-from app.core.config import settings
-from taskflow.app.schema.user_schema import TokenData
+from taskflow.app.core.config import settings
+from taskflow.app.schemas.contract.token_schema import TokenData
 from jose import jwt, JWTError
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

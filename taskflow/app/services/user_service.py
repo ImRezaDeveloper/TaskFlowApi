@@ -3,7 +3,7 @@ from starlette import status
 from taskflow.app.core.security import hash_pwd
 from taskflow.app.crud.user_repository import get_user_by_id as get_user_id
 from taskflow.app.crud.user_repository import create_user_db, update_user_db, get_users_db
-from taskflow.app.schema.user_schema import UserCreate
+from taskflow.app.schemas.contract.user_schema import UserCreate
 from ..validators import validate_email_availability
 
 def get_users():

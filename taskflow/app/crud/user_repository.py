@@ -1,10 +1,10 @@
 import psycopg2
 
-from taskflow.app.db.db import get_db
+from taskflow.app.api.dependencies import get_db
 
 def get_users_db():
     conn = get_db()
-    cur = conn.cursor()
+    cur = conn
 
     cur.execute("""
         SELECT id, username, email
