@@ -6,8 +6,8 @@ from taskflow.app.crud.user_repository import create_user_db, update_user_db, ge
 from taskflow.app.schemas.contract.user_schema import UserCreate
 from ..validators import validate_email_availability
 
-def get_users():
-    return get_users_db()
+def get_users(conn):
+    return get_users_db(conn)
 
 def get_user_by_id(user_id: int):
     

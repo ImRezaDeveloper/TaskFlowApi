@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     # App
     PORT: int = 8000
     PROJECT_NAME: str = "TASK_MANAGEMENT_API"
+    
+    # LOGS
+    LOG_LEVEL: str = "INFO"  # Can be DEBUG, INFO, WARNING, ERROR
+    LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 
 settings = Settings()

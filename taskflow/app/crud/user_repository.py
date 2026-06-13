@@ -1,10 +1,10 @@
+from fastapi import Depends
 import psycopg2
 
 from taskflow.app.api.dependencies import get_db
 
-def get_users_db():
-    conn = get_db()
-    cur = conn
+def get_users_db(conn):
+    cur = conn.cursor()
 
     cur.execute("""
         SELECT id, username, email
@@ -13,7 +13,7 @@ def get_users_db():
 
     users = cur.fetchall()
     cur.close()
-    conn.close()
+    # conn.close()
 
     return users
 
