@@ -53,8 +53,7 @@ def create_user_db(username: str, email: str, password_hash: str):
 
     return user
 
-def get_user_by_id(user_id: int):
-    conn = get_db()
+def get_user_by_id(user_id: int, current_user, conn):
     cur = conn.cursor()
 
     cur.execute("""
@@ -66,7 +65,7 @@ def get_user_by_id(user_id: int):
     user = cur.fetchone()
 
     cur.close()
-    conn.close()
+    # conn.close()
 
     return user
 

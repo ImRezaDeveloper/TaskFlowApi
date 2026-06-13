@@ -9,9 +9,9 @@ from ..validators import validate_email_availability
 def get_users(conn):
     return get_users_db(conn)
 
-def get_user_by_id(user_id: int):
+def get_user_by_id(user_id: int, current_user, conn):
     
-    existing_user = get_user_id(user_id)
+    existing_user = get_user_id(user_id, current_user, conn)
     
     if not existing_user:
         raise HTTPException(

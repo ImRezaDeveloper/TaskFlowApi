@@ -1,5 +1,4 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from starlette import status
 from taskflow.app.api.dependencies import get_db
 from taskflow.app.schemas.contract.user_schema import UserCreate
@@ -13,7 +12,7 @@ router = APIRouter(
     tags=["Users"]
 )
 
-@router.get("/", status_code=status.HTTP_200_OK, )
+@router.get("/", status_code=status.HTTP_200_OK)
 def list_users(conn = Depends(get_db)):
     return get_users(conn)
 
@@ -21,9 +20,13 @@ def list_users(conn = Depends(get_db)):
 def read_me(current_user = Depends(get_current_user)):
     return current_user
 
-@router.get("/{user_id}", status_code=status.HTTP_200_OK)
-def get_user(user_id: int):
-    return get_user_id(user_id)
+@router.get("/{user_id}")
+def get_user(
+    user_id: int,
+    current_user = Depends(get_current_user),
+    conn = Depends(get_db)
+):
+    return get_user_id(user_id, current_user, conn)
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def add_user(user: UserCreate):

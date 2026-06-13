@@ -86,30 +86,30 @@ def get_current_user(
         raise credentials_exception
 
     cur = conn.cursor()
-
+    
     cur.execute(
         """
-        SELECT id, username, email, is_active
+        SELECT id, username, email
         FROM users
-        WHERE email = %s
+        WHERE id = %s
         """,
-        (email,)
+        (user_id,)
     )
 
     user = cur.fetchone()
-
+    
     cur.close()
 
     if user is None:
         raise credentials_exception
-
-    user_id, username, email = user
 
     # if not is_active:
     #     raise HTTPException(
     #         status_code=status.HTTP_403_FORBIDDEN,
     #         detail="Inactive user"
     #     )
+    
+    user_id, username, email = user
 
     return {
         "id": user_id,
