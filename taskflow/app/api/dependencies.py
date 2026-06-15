@@ -11,3 +11,4 @@ def get_db() -> Generator:
         if connection:
             # ALWAYS put the connection back into the pool when the request ends
             db_pool.putconn(connection)
+            

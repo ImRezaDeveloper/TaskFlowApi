@@ -1,13 +1,14 @@
 from fastapi import Depends, HTTPException
-from taskflow.app.api.dependencies import get_db
 from taskflow.app.core.security import verify_pwd
 from taskflow.app.security.auth.jwt_handler import create_access_token
 from taskflow.app.core.config import settings
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from taskflow.app.security.auth.oauth2 import oauth_schemes
+from taskflow.app.api.dependencies import get_db
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth = oauth_schemes
 
 
 def authenticate_user(email, password, conn = Depends(get_db)):
@@ -61,7 +62,7 @@ def authenticate_user(email, password, conn = Depends(get_db)):
 
 # get current user
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(oauth),
     conn = Depends(get_db)
 ):
     credentials_exception = HTTPException(
@@ -89,7 +90,7 @@ def get_current_user(
     
     cur.execute(
         """
-        SELECT id, username, email
+        SELECT id, username, email, role_id
         FROM users
         WHERE id = %s
         """,
@@ -109,10 +110,11 @@ def get_current_user(
     #         detail="Inactive user"
     #     )
     
-    user_id, username, email = user
+    user_id, username, email, role_id = user
 
     return {
         "id": user_id,
         "username": username,
-        "email": email
+        "email": email,
+        "role_id": role_id
     }

@@ -16,3 +16,4 @@ def login_for_access_token(
 ):
     print(f'this is pass: {form_data.password}')
     return authenticate_user(email=form_data.username, password=form_data.password, conn=conn)
+

@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 from taskflow.app.crud.user_repository import get_user_by_email
 
-def validate_email_availability(email: str):
-    existing_user = get_user_by_email(email)
+def validate_email_availability(email: str, conn):
+    existing_user = get_user_by_email(email, conn)
 
     if existing_user:
         raise HTTPException(

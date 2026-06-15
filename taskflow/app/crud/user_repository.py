@@ -1,4 +1,4 @@
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 import psycopg2
 
 from taskflow.app.api.dependencies import get_db
@@ -35,21 +35,20 @@ def verify_exists_user(email: str):
 
     return user
 
-def create_user_db(username: str, email: str, password_hash: str):
-    conn = get_db()
+def create_user_db(username: str, email: str, password_hash: str, role_id: int, conn):
     cur = conn.cursor()
-
+    
     cur.execute("""
-        INSERT INTO users (username, email, password_hash)
-        VALUES (%s, %s, %s)
-        RETURNING id, username, email
-    """, (username, email, password_hash))
+        INSERT INTO users(username, email, password_hash, role_id)
+        VALUES(%s, %s, %s, %s)
+        RETURNING id
+    """, (username, email, password_hash, role_id))
 
     user = cur.fetchone()
 
     conn.commit()
     cur.close()
-    conn.close()
+    # conn.close()
 
     return user
 
@@ -107,8 +106,7 @@ def delete_user_db(user_id: int):
 
     return deleted
 
-def get_user_by_email(email: str):
-    conn = get_db()
+def get_user_by_email(email: str, conn):
     cur = conn.cursor()
 
     cur.execute("""
@@ -120,6 +118,6 @@ def get_user_by_email(email: str):
     user = cur.fetchone()
 
     cur.close()
-    conn.close()
+    # conn.close()
 
     return user
