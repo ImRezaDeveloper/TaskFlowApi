@@ -35,22 +35,32 @@ def verify_exists_user(email: str):
 
     return user
 
-def create_user_db(username: str, email: str, password_hash: str, role_id: int, conn):
+def create_user_db(username, email, password_hash, role_ids, conn):
     cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO users(username, email, password_hash)
+            VALUES(%s, %s, %s)
+            RETURNING id
+        """, (username, email, password_hash))
+        
+        user_id = cur.fetchone()[0]
+
+        for role_id in role_ids:
+            cur.execute("""
+                INSERT INTO user_roles(user_id, role_id)
+                VALUES (%s, %s)
+            """, (user_id, role_id))
+        
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cur.close()
     
-    cur.execute("""
-        INSERT INTO users(username, email, password_hash, role_id)
-        VALUES(%s, %s, %s, %s)
-        RETURNING id
-    """, (username, email, password_hash, role_id))
+    return user_id
 
-    user = cur.fetchone()
-
-    conn.commit()
-    cur.close()
-    # conn.close()
-
-    return user
 
 def get_user_by_id(user_id: int, current_user, conn):
     cur = conn.cursor()

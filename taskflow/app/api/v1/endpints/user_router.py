@@ -30,7 +30,7 @@ def get_user(
     return get_user_id(user_id, current_user, conn)
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def add_user(user: UserCreate, conn = Depends(get_db), required_admin = Depends(require_admin)):
+def add_user(user: UserCreate, conn = Depends(get_db)):
     return create_user(
         username=user.username,
         email=user.email,
@@ -44,5 +44,5 @@ def edit_user(user_id: int, username: str, email: str):
     return update_user(user_id, username, email)
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_user(user_id: int):
+def remove_user(user_id: int, required_admin = Depends(require_admin)):
     return delete_user(user_id)

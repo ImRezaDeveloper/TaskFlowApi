@@ -6,13 +6,13 @@ from typing import Optional
 class RoleEnum(str, Enum):
     ADMIN = "1"
     USER = "2"
-    MANAGER = "3"
+    MEMBERSHIP = "3"
 
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
-    roles: RoleEnum
+    roles: list[RoleEnum]
 
 
 class UserUpdate(BaseModel):
