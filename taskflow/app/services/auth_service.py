@@ -3,14 +3,13 @@ from taskflow.app.core.security import verify_pwd
 from taskflow.app.security.auth.jwt_handler import create_access_token
 from taskflow.app.core.config import settings
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from taskflow.app.security.auth.oauth2 import oauth_schemes
 from taskflow.app.api.dependencies import get_db
 
 oauth = oauth_schemes
 
-
+# this method should be use Redis for set rate limitions ===
 def authenticate_user(email, password, conn = Depends(get_db)):
     cur = conn.cursor()
 

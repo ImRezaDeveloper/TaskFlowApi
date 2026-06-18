@@ -1,6 +1,3 @@
-from fastapi import Depends, HTTPException
-import psycopg2
-
 from taskflow.app.api.dependencies import get_db
 
 def get_users_db(conn):
