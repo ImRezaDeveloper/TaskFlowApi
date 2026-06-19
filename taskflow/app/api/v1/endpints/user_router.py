@@ -36,7 +36,7 @@ def add_user(user: UserCreate, conn = Depends(get_db)):
         email=user.email,
         password_hash = hash_pwd(user.password),
         conn=conn,
-        role_id=user.roles
+        role_id=user.roles,
     )
 
 @router.put("/{user_id}", status_code=status.HTTP_200_OK)

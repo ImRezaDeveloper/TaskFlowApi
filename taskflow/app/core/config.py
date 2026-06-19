@@ -7,6 +7,8 @@ load_dotenv()
 class Settings(BaseSettings):
     # JWT
     SECRET_KEY: str
+    REFRESH_SECRET_KEY: str
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 20
 

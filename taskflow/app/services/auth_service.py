@@ -1,61 +1,46 @@
 from fastapi import Depends, HTTPException
 from taskflow.app.core.security import verify_pwd
-from taskflow.app.security.auth.jwt_handler import create_access_token
+from taskflow.app.security.auth.jwt_handler import create_access_token, create_refresh_token
 from taskflow.app.core.config import settings
 from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
 from taskflow.app.security.auth.oauth2 import oauth_schemes
 from taskflow.app.api.dependencies import get_db
+from psycopg2.extras import RealDictCursor
 
 oauth = oauth_schemes
 
 # this method should be use Redis for set rate limitions ===
-def authenticate_user(email, password, conn = Depends(get_db)):
-    cur = conn.cursor()
-
-    cur.execute(
-        """
-        SELECT id, email, password_hash
-        FROM users
-        WHERE email = %s
-        """,
-        (email,)
-    )
-
-    user = cur.fetchone()
-
-    cur.close()
-    # conn.close()
-
-    if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="Wrong email or password"
+def authenticate_user(email: str, password: str, conn = Depends(get_db)):
+    
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        
+        cur.execute(
+            "SELECT id, email, password_hash FROM users WHERE email = %s",
+            (email,)
         )
+        user = cur.fetchone()
 
-    user_id, email, password_hash = user
+        if not user or not verify_pwd(password, user["password_hash"]):
+            raise HTTPException(
+                status_code=401,
+                detail="Wrong email or password"
+            )
 
-    if not verify_pwd(
-        plainPassword=password,
-        hashedPassword=password_hash
-    ):
-        raise HTTPException(
-            status_code=401,
-            detail="Wrong email or password"
+        user_id = user["id"]
+        access_token = create_access_token(data={"sub": str(user_id)})
+        refresh_token = create_refresh_token(data={"sub": str(user_id)})
+        
+        cur.execute(
+            "INSERT INTO refresh_tokens (user_id, token) VALUES (%s, %s)", 
+            (user_id, refresh_token)
         )
-
-    # if not is_active:
-    #     raise HTTPException(
-    #         status_code=403,
-    #         detail="Inactive user"
-    #     )
-
-    access_token = create_access_token(
-        data={"sub": str(user_id)}
-    )
-
+        
+        conn.commit()
+    
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer"
     }
 
