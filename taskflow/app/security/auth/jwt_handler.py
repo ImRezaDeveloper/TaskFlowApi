@@ -46,7 +46,6 @@ def verify_refresh_token(data: dict, db_connection):
 
     with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
         
-        # Verify Token in DB
         cursor.execute("SELECT * FROM refresh_tokens WHERE token = %s", (data.refresh_token,))
         token_in_db = cursor.fetchone()
         
