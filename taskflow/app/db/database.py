@@ -1,20 +1,27 @@
-import sys
-import psycopg2
-from psycopg2 import pool
-from taskflow.app.core.config import settings
+import os
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from logging import Logger
+from dotenv import load_dotenv
 
-try:
-    # Initialize a global connection pool
-    db_pool = psycopg2.pool.ThreadedConnectionPool(
-        minconn=1,   # Minimum connections to keep alive
-        maxconn=10,  # Maximum connections to scale up to under heavy load
-        dbname=settings.DB_NAME,
-        user=settings.DB_USER,
-        password=settings.DB_PASSWORD,
-        host=settings.DB_HOST,
-        port=settings.DB_PORT,
-    )
-    print("🚀 Database connection pool created successfully, bro!")
-except Exception as e:
-    print(f"❌ Error creating PostgreSQL connection pool: {e}")
-    sys.exit(1)
+load_dotenv()
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL"
+)
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    except Exception as e:
+        Logger.error(f"Database error: {e}")
+        db.rollback()
+        raise
+    finally:
+        db.close()
