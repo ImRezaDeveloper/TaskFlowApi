@@ -1,18 +1,15 @@
-from taskflow.app.api.dependencies import get_db
+from fastapi import Depends
+from sqlalchemy import select
+from taskflow.app.db.database import get_db
+from taskflow.app.models.users import User
+from sqlalchemy.ext.asyncio import AsyncSession
 
-def get_users_db(conn):
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT id, username, email
-        FROM users
-    """)
-
-    users = cur.fetchall()
-    cur.close()
-    # conn.close()
-
-    return users
+def get_users_db(db: AsyncSession = Depends(get_db)):
+    query = select(User)
+    result = db.execute(query)
+    tasks = result.scalars().all()
+    
+    return tasks
 
 def verify_exists_user(email: str):
     
@@ -32,32 +29,21 @@ def verify_exists_user(email: str):
 
     return user
 
-def create_user_db(username, email, password_hash, role_ids, conn):
-    cur = conn.cursor()
-    try:
-        cur.execute("""
-            INSERT INTO users(username, email, password_hash)
-            VALUES(%s, %s, %s)
-            RETURNING id
-        """, (username, email, password_hash))
-        
-        user_id = cur.fetchone()[0]
+def create_user_db(username, email, hashed_password, full_name, is_active, is_verified, get_db: AsyncSession = Depends(get_db)):
 
-        for role_id in role_ids:
-            cur.execute("""
-                INSERT INTO user_roles(user_id, role_id)
-                VALUES (%s, %s)
-            """, (user_id, role_id))
-        
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        raise e
-    finally:
-        cur.close()
+    new_user = User(
+        username=username,
+        email=email,
+        hashed_password=hashed_password,
+        full_name=full_name,
+        is_active=is_active,
+        is_verified=is_verified
+    )
     
-    return user_id
-
+    get_db.add(new_user)
+    get_db.commit()
+    
+    return new_user
 
 def get_user_by_id(user_id: int, current_user, conn):
     cur = conn.cursor()
@@ -113,8 +99,8 @@ def delete_user_db(user_id: int):
 
     return deleted
 
-def get_user_by_email(email: str, conn):
-    cur = conn.cursor()
+def get_user_by_email(email: str, get_db):
+    cur = get_db.cursor()
 
     cur.execute("""
         SELECT id, username, email

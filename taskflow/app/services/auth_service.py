@@ -5,7 +5,7 @@ from taskflow.app.core.config import settings
 from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
 from taskflow.app.security.auth.oauth2 import oauth_schemes
-from taskflow.app.api.dependencies import get_db
+from taskflow.app.db.database import get_db
 from psycopg2.extras import RealDictCursor
 
 oauth = oauth_schemes

@@ -1,13 +1,15 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from starlette import status
 from taskflow.app.core.security import hash_pwd
 from taskflow.app.crud.user_repository import get_user_by_id as get_user_id
 from taskflow.app.crud.user_repository import create_user_db, update_user_db, get_users_db
+from taskflow.app.db.database import get_db
 from ..validators import validate_email_availability
+from sqlalchemy.ext.asyncio import AsyncSession
 
-def get_users(conn):
-    
-    return get_users_db(conn)
+def get_users(db: AsyncSession = Depends(get_db)):
+    users = get_users_db(db)
+    return users
 
 def get_user_by_id(user_id: int, current_user, conn):
     
@@ -21,11 +23,11 @@ def get_user_by_id(user_id: int, current_user, conn):
         
     return existing_user
     
-def create_user(username: str, email: str, password_hash: str, role_id, conn):
+def create_user(username: str, email: str, hashed_password: str, full_name: str, is_active: bool, is_verified: bool, get_db):
     
-    validate_email_availability(email, conn)
-    hash_pwd(password_hash)
-    return create_user_db(username, email, password_hash, role_id, conn)
+    # validate_email_availability(email, get_db)
+    hash_pwd(hashed_password)
+    return create_user_db(username, email, hashed_password, full_name, is_active, is_verified, get_db)
 
 def update_user(user_id: int, username, email):
     user = get_user_id(user_id)

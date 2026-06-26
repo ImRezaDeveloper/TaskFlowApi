@@ -2,7 +2,7 @@ from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Depends, HTTPException
 from fastapi import APIRouter
-from taskflow.app.api.dependencies import get_db
+from taskflow.app.db.database import get_db
 from taskflow.app.schemas.contract.token_schema import Token, RefreshRequest
 from taskflow.app.security.auth.jwt_handler import verify_refresh_token
 from taskflow.app.services.auth_service import authenticate_user

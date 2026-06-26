@@ -20,7 +20,7 @@ def get_db():
     try:
         yield db
     except Exception as e:
-        Logger.error(f"Database error: {e}")
+        # Logger.error(f"Database error: {e}")
         db.rollback()
         raise
     finally:

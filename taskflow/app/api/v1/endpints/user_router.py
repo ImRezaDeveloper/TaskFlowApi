@@ -1,7 +1,10 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from starlette import status
-from taskflow.app.api.dependencies import get_db
-from taskflow.app.schemas.contract.user_schema import UserCreate
+from sqlalchemy.ext.asyncio import AsyncSession
+from taskflow.app.db.database import get_db
+from taskflow.app.schemas.contract.user_schema import UserCreate, UserDisplay
 from taskflow.app.services.user_service import get_user_by_id as get_user_id
 from taskflow.app.services.user_service import create_user, hash_pwd
 from taskflow.app.services.user_service import update_user, delete_user, get_users, create_user
@@ -13,9 +16,10 @@ router = APIRouter(
     tags=["Users"]
 )
 
-@router.get("/", status_code=status.HTTP_200_OK)
-def list_users(conn = Depends(get_db), required_admin = Depends(require_admin)):
-    return get_users(conn)
+@router.get("/", status_code=status.HTTP_200_OK, response_model=List[UserDisplay])
+def list_users(db: AsyncSession = Depends(get_db)):
+    return get_users(db)
+
 
 @router.get("/me")
 def read_me(current_user = Depends(get_current_user)):
@@ -30,13 +34,15 @@ def get_user(
     return get_user_id(user_id, current_user, conn)
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def add_user(user: UserCreate, conn = Depends(get_db)):
+def add_user(user: UserCreate, get_db: AsyncSession = Depends(get_db)):
     return create_user(
         username=user.username,
         email=user.email,
-        password_hash = hash_pwd(user.password),
-        conn=conn,
-        role_id=user.roles,
+        hashed_password = hash_pwd(user.hashed_password),
+        full_name=user.full_name,
+        is_active=user.is_active,
+        is_verified=user.is_verified,
+        get_db=get_db
     )
 
 @router.put("/{user_id}", status_code=status.HTTP_200_OK)

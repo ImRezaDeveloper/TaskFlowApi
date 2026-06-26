@@ -11,9 +11,10 @@ class RoleEnum(str, Enum):
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
-    password: str
-    roles: list[RoleEnum]
-
+    hashed_password: str
+    full_name: str
+    is_active: bool
+    is_verified: bool
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
@@ -21,9 +22,10 @@ class UserUpdate(BaseModel):
 
 
 class UserDisplay(BaseModel):
-    id: int
+    # id: int
     username: str
     email: EmailStr
+    is_active: bool
 
     class Config:
         from_attributes = True
