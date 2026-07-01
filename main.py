@@ -36,4 +36,4 @@ def root():
     # Named logger for this specific module
     logger = logging.getLogger(__name__)
     logger.info("Root endpoint was hit!")
-    return {"message": f"Welcome to {Settings.PROJECT_NAME}!"}
+    # return {"message": f"Welcome to {Settings.PROJECT_NAME}!"}

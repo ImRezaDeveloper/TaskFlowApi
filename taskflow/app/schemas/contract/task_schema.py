@@ -17,7 +17,7 @@ class TaskCreate(TaskBase):
     status: TaskStatus = Field(default=TaskStatus.TODO)
     priority: TaskPriority = Field(default=TaskPriority.MEDIUM)
     due_date: Optional[datetime] = Field(None, description="تاریخ ددلاین تسک")
-    board_id: UUID = Field(..., description="آیدی بوردی که تسک متعلق به آن است")
+    # board_id: UUID = Field(..., description="آیدی بوردی که تسک متعلق به آن است")
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=100)
@@ -25,11 +25,11 @@ class TaskUpdate(BaseModel):
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
     due_date: Optional[datetime] = None
-    board_id: Optional[UUID] = None
+    # board_id: Optional[UUID] = None
 
 class TaskResponse(TaskBase):
     id: UUID
-    board_id: UUID
+    # board_id: UUID
     user_id: UUID
     created_at: datetime
     updated_at: datetime
