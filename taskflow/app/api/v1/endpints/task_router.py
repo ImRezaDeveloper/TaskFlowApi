@@ -40,7 +40,7 @@ async def get_board_tasks(
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     return await get_board_tasks_service(db, board_id, current_user.id, skip, limit)
 
@@ -59,7 +59,7 @@ def update_task(
 def delete_task(
     task_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     delete_task_service(db, task_id, current_user.id)
     return None

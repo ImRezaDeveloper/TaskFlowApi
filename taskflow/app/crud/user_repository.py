@@ -1,8 +1,12 @@
+from uuid import UUID
+
 from fastapi import Depends
 from sqlalchemy import select
 from taskflow.app.db.database import get_db
 from taskflow.app.models.users import User
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from taskflow.app.schemas.contract.user_schema import UserUpdate
 
 def get_users_db(db: AsyncSession = Depends(get_db)):
     query = select(User)
@@ -11,23 +15,12 @@ def get_users_db(db: AsyncSession = Depends(get_db)):
     
     return tasks
 
-def verify_exists_user(email: str):
-    
-    conn = get_db()
-    cur = conn.cursor()
+def verify_exists_user(db: AsyncSession, email: str) -> bool:
+    stmt = select(User).where(User.email == email)
 
-    cur.execute("""
-        SELECT id, username, email
-        FROM users
-        WHERE email = %s
-    """, (email,))
+    result = db.execute(stmt)
 
-    user = cur.fetchone()
-
-    cur.close()
-    conn.close()
-
-    return user
+    return result.scalar_one_or_none() is not None
 
 def create_user_db(username, email, hashed_password, full_name, is_active, is_verified, get_db: AsyncSession = Depends(get_db)):
 
@@ -45,72 +38,39 @@ def create_user_db(username, email, hashed_password, full_name, is_active, is_ve
     
     return new_user
 
-def get_user_by_id(user_id: int, current_user, conn):
-    cur = conn.cursor()
+def get_user_by_id(db: AsyncSession, user_id: UUID):
+    stmt = select(User).where(User.id == user_id)
 
-    cur.execute("""
-        SELECT id, username, email
-        FROM users
-        WHERE id = %s
-    """, (user_id,))
+    result = db.execute(stmt)
+    return result.scalar_one_or_none()
 
-    user = cur.fetchone()
+def update_user_db(
+    db: AsyncSession,
+    user: User,
+    user_data: UserUpdate,
+):
+    for key, value in user_data.model_dump(exclude_unset=True).items():
+        setattr(user, key, value)
 
-    cur.close()
-    # conn.close()
-
-    return user
-
-def update_user_db(user_id: int, username: str, email: str):
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        UPDATE users
-        SET username = %s,
-            email = %s
-        WHERE id = %s
-        RETURNING id, username, email
-    """, (username, email, user_id))
-
-    user = cur.fetchone()
-
-    conn.commit()
-    cur.close()
-    conn.close()
+    db.commit()
+    db.refresh(user)
 
     return user
 
-def delete_user_db(user_id: int):
-    conn = get_db()
-    cur = conn.cursor()
+def delete_user_db(db: AsyncSession, user_id: UUID):
+    user = db.get(User, user_id)
 
-    cur.execute("""
-        DELETE FROM users
-        WHERE id = %s
-        RETURNING id
-    """, (user_id,))
+    if user is None:
+        return None
 
-    deleted = cur.fetchone()
-
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    return deleted
-
-def get_user_by_email(email: str, get_db):
-    cur = get_db.cursor()
-
-    cur.execute("""
-        SELECT id, username, email
-        FROM users
-        WHERE email = %s
-    """, (email,))
-
-    user = cur.fetchone()
-
-    cur.close()
-    # conn.close()
+    db.delete(user)
+    db.commit()
 
     return user
+
+def get_user_by_email(db: AsyncSession, email: str):
+    stmt = select(User).where(User.email == email)
+
+    result = db.execute(stmt)
+
+    return result.scalar_one_or_none()

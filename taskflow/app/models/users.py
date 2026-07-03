@@ -6,7 +6,6 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from taskflow.app.db.database import Base
 
-# کلاس پایه برای مدل‌ها
 
 class User(Base):
     __tablename__ = "users"

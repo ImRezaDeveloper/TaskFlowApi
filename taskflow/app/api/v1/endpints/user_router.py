@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from starlette import status
@@ -27,11 +28,11 @@ def read_me(current_user = Depends(get_current_user)):
 
 @router.get("/{user_id}")
 def get_user(
-    user_id: int,
+    user_id: UUID,
     current_user = Depends(get_current_user),
-    conn = Depends(get_db),
+    get_db: AsyncSession = Depends(get_db),
 ):
-    return get_user_id(user_id, current_user, conn)
+    return get_user_id(user_id, current_user, get_db)
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def add_user(user: UserCreate, get_db: AsyncSession = Depends(get_db)):
