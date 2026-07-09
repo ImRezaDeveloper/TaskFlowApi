@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy import String, Integer, DateTime, ForeignKey, Text, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from taskflow.app.db.database import Base
+from app.db.database import Base
 
 class TaskStatus(str, Enum):
     TODO = "todo"
@@ -60,6 +60,13 @@ class Task(Base):
     board = relationship(
         "Board",
         back_populates="tasks"
+    )
+    
+    # comments
+    comments = relationship(
+        "Comment",
+        back_populates="task",
+        cascade="all, delete-orphan"
     )
     
     def __repr__(self) -> str:

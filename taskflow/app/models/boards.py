@@ -3,7 +3,7 @@ from sqlalchemy import String, Text, ForeignKey, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from taskflow.app.db.database import Base
+from app.db.database import Base
 
 
 class Board(Base):
@@ -46,6 +46,12 @@ class Board(Base):
     
     tasks = relationship(
         "Task",
+        back_populates="board",
+        cascade="all, delete-orphan"
+    )
+    
+    comments = relationship(
+        "Comment",
         back_populates="board",
         cascade="all, delete-orphan"
     )

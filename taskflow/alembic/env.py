@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from app.models.users import Base
 from app.models.tasks import Base
 from app.models.boards import Base
+from app.models.comments import Base
 from alembic import context
 
 # this is the Alembic Config object, which provides
