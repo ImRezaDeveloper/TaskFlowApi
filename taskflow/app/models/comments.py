@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.database import Base
+from taskflow.app.db.database import Base
 
 
 class Comment(Base):
@@ -55,6 +55,7 @@ class Comment(Base):
         "User",
         back_populates="comments"
     )
+
 
     task = relationship(
         "Task",

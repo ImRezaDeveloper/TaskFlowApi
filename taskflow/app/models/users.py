@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import String, DateTime, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from app.db.database import Base
+from taskflow.app.db.database import Base
 
 
 class User(Base):
@@ -31,12 +31,7 @@ class User(Base):
 
     tasks: Mapped[List["Task"]] = relationship(back_populates="owner", cascade="all, delete-orphan")
     boards: Mapped[List["Board"]] = relationship(back_populates="owner", cascade="all, delete-orphan")
-
-    # comments
-    comments = relationship(
-        "Comment",
-        back_populates="task",
-        cascade="all, delete-orphan"
-    )
-    def __repr__(self) -> str:
-        return f"<User {self.username}>"
+    comments: Mapped[List["Comment"]] = relationship(back_populates="author", cascade="all, delete-orphan")
+    
+    # def __repr__(self) -> str:
+    #     return f"<User {self.username}>"

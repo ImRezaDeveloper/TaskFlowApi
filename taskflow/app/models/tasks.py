@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy import String, Integer, DateTime, ForeignKey, Text, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.db.database import Base
+from taskflow.app.db.database import Base
 
 class TaskStatus(str, Enum):
     TODO = "todo"

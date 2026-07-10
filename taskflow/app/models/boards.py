@@ -3,7 +3,7 @@ from sqlalchemy import String, Text, ForeignKey, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.database import Base
+from taskflow.app.db.database import Base
 
 
 class Board(Base):

@@ -5,6 +5,7 @@ from taskflow.app.api.v1.endpints.auth_router import router as auth_router
 from taskflow.app.api.v1.endpints.user_router import router as user_router
 from taskflow.app.api.v1.endpints.task_router import router as task_router
 from taskflow.app.api.v1.endpints.board_router import router as board_router
+from taskflow.app.api.v1.endpints.comment_router import router as comment_router
 from taskflow.app.core.loggin import setup_logging
 from taskflow.app.db.database import Base, engine
 
@@ -23,6 +24,7 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(task_router)
 app.include_router(board_router)
+app.include_router(comment_router)
 
 app.add_middleware(
     CORSMiddleware,

@@ -2,7 +2,8 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
-from taskflow.app.models.tasks import TaskStatus, TaskPriority # ایمپورت Enumهایی که توی مدل ساختیم
+from taskflow.app.models.tasks import TaskStatus, TaskPriority
+from taskflow.app.schemas.contract.comment_schema import CommentResponse # ایمپورت Enumهایی که توی مدل ساختیم
 
 class TaskBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=100, description="عنوان تسک")
@@ -17,7 +18,7 @@ class TaskCreate(TaskBase):
     status: TaskStatus = Field(default=TaskStatus.TODO)
     priority: TaskPriority = Field(default=TaskPriority.MEDIUM)
     due_date: Optional[datetime] = Field(None, description="تاریخ ددلاین تسک")
-    # board_id: UUID = Field(..., description="آیدی بوردی که تسک متعلق به آن است")
+    board_id: UUID = Field(..., description="آیدی بوردی که تسک متعلق به آن است")
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=100)
@@ -34,5 +35,7 @@ class TaskResponse(TaskBase):
     created_at: datetime
     updated_at: datetime
 
+    comments: list[CommentResponse] = []
+    
     class Config:
         from_attributes = True
