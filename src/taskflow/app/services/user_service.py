@@ -8,16 +8,17 @@ from app.crud.user_repository import get_user_by_id as get_user_id
 from app.crud.user_repository import create_user_db, update_user_db, get_users_db
 from app.db.database import get_db
 from app.models.users import User
+from app.schemas.contract.user_schema import UserUpdate
 from ..validators import validate_email_availability
 logger = logging.getLogger("taskflow.services.users")
 from sqlalchemy.ext.asyncio import AsyncSession
 
-def get_users(db: AsyncSession = Depends(get_db)):
+def get_users(db: AsyncSession):
     users = get_users_db(db)
     return users
 
-def get_user_by_id(user_id: UUID, current_user_id: UUID,db: AsyncSession = Depends(get_db)) -> User:
-    logger.info(f"User {current_user_id} requested Uesr ID {user_id}")
+def get_user_by_id(user_id: UUID, db: AsyncSession) -> User:
+    # logger.info(f"User {current_user_id} requested Uesr ID {user_id}")
     
     existing_user = get_user_id(db, user_id)
     
@@ -35,8 +36,8 @@ def create_user(username: str, email: str, hashed_password: str, full_name: str,
     hash_pwd(hashed_password)
     return create_user_db(username, email, hashed_password, full_name, is_active, is_verified, get_db)
 
-def update_user(user_id: UUID, username, email):
-    user = get_user_id(user_id)
+def update_user(user_id: UUID, user_data: UserUpdate, db: AsyncSession):
+    user = get_user_id(db, user_id)
     
     if not user:
         raise HTTPException(
@@ -44,11 +45,11 @@ def update_user(user_id: UUID, username, email):
             detail="User not found"
         )
         
-    return update_user_db(user_id, username, email)
+    return update_user_db(user_data, user, db)
 
-def delete_user(user_id: UUID, user):
+def delete_user(user_id: UUID, db: AsyncSession):
     
-    user = get_user_id(user_id)
+    user = get_user_by_id(user_id, db)
     
     if not user:
         raise HTTPException(

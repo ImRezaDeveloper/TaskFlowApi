@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr
@@ -13,13 +14,13 @@ class UserCreate(UserBase):
     password: str
     full_name: str | None = None
     is_active: bool
-    is_verfied: bool
+    is_verified: bool
 
 
 class UserUpdate(BaseModel):
-    username: str | None = None
-    email: EmailStr | None = None
-    password: str | None = None
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
 
 
 class UserResponse(UserBase):

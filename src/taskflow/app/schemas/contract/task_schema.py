@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from app.models.tasks import TaskStatus, TaskPriority
 from app.schemas.contract.comment_schema import CommentResponse # ایمپورت Enumهایی که توی مدل ساختیم
 
@@ -37,5 +37,4 @@ class TaskResponse(TaskBase):
 
     comments: list[CommentResponse] = []
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

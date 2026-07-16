@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.contract.user_schema import UserUpdate
 
-def get_users_db(db: AsyncSession = Depends(get_db)):
+def get_users_db(db: AsyncSession):
     query = select(User)
     result = db.execute(query)
     tasks = result.scalars().all()
@@ -35,6 +35,7 @@ def create_user_db(username, email, hashed_password, full_name, is_active, is_ve
     
     get_db.add(new_user)
     get_db.commit()
+    get_db.refresh(new_user)
     
     return new_user
 
@@ -45,9 +46,9 @@ def get_user_by_id(db: AsyncSession, user_id: UUID):
     return result.scalar_one_or_none()
 
 def update_user_db(
-    db: AsyncSession,
-    user: User,
     user_data: UserUpdate,
+    user: User,
+    db: AsyncSession,
 ):
     for key, value in user_data.model_dump(exclude_unset=True).items():
         setattr(user, key, value)
@@ -58,7 +59,7 @@ def update_user_db(
     return user
 
 def delete_user_db(db: AsyncSession, user_id: UUID):
-    user = db.get(User, user_id)
+    user = get_user_by_id(db, user_id)
 
     if user is None:
         return None
