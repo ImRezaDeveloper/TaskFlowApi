@@ -5,7 +5,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from starlette import status
 from app.core.security import hash_pwd
 from app.crud.user_repository import get_user_by_id as get_user_id
-from app.crud.user_repository import create_user_db, update_user_db, get_users_db
+from app.crud.user_repository import create_user_db, update_user_db, get_users_db, delete_user_db
 from app.db.database import get_db
 from app.models.users import User
 from app.schemas.contract.user_schema import UserUpdate
@@ -57,4 +57,4 @@ def delete_user(user_id: UUID, db: AsyncSession):
             detail="User not found"
         )
         
-    return 
+    return delete_user_db(db, user_id)

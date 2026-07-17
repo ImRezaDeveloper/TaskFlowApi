@@ -85,15 +85,12 @@ def update_task_service(db: AsyncSession, task_id: UUID, update_data: TaskUpdate
 def delete_task_service(db: AsyncSession, task_id: UUID, current_user_id: UUID) -> bool:
     logger.info(f"User {current_user_id} attempting to delete task {task_id}")
     
-    get_task_by_id_service(db, task_id, current_user_id)
+    task = get_task_by_id_service(db, task_id, current_user_id)
     
-    try:
-        delete_task_db(db, task_id)
-        logger.info(f"Task {task_id} successfully deleted by user {current_user_id}")
-        return True
-    except Exception as e:
-        logger.error(f"Error deleting task {task_id}: {str(e)}", exc_info=True)
+    if not task:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="there was an error to deleting task"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
         )
+        
+    return delete_task_db(db, task_id)

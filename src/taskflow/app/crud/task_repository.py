@@ -4,6 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.tasks import Task
 from app.schemas.contract.task_schema import TaskCreate, TaskUpdate
+import logging
+
+logger = logging.getLogger("taskflow.repository.tasks")
 
 def create_task_db(db: AsyncSession, task_data: TaskCreate, user_id: UUID) -> Task:
     
@@ -49,11 +52,13 @@ def update_task_db(db: AsyncSession, task_id: UUID, update_data: TaskUpdate) -> 
     return task
 
 
-def delete_task_db(db: AsyncSession, task_id: UUID) -> bool:
+async def delete_task_db(db: AsyncSession, task_id: UUID) -> bool:
     task = get_task_by_id_db(db, task_id)
     if not task:
         return False
         
-    db.delete(task)
-    db.commit()
+    await db.delete(task)   # ← Add await
+    await db.commit()       # ← Add await
+    check_test = db.get(db, task_id)
+    logger.info(f"🔍 After commit, task exists? {check_test is not None}")
     return True

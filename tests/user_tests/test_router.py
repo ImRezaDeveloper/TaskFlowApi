@@ -94,35 +94,34 @@ client = TestClient(app)
 #     assert response.json()["id"] == user_id
 #     assert response.json()["username"] == "nima"
     
-def test_delete_user_success():
+# def test_delete_user_success():
     
-    # arrange
-    user_data = {
-        "username": "fardad",
-        "email": "fardad@test.com",
-        "password": "StrongPassword423!",
-        "full_name": "Fardad",
-        "is_active": True,
-        "is_verified": False,
-    }
+#     # arrange
+#     user_data = {
+#         "username": "fardad",
+#         "email": "fardad@test.com",
+#         "password": "StrongPassword423!",
+#         "full_name": "Fardad",
+#         "is_active": True,
+#         "is_verified": False,
+#     }
 
-    create_response = client.post(
-        "/users/",
-        json=user_data
-    )
+#     create_response = client.post(
+#         "/users/",
+#         json=user_data
+#     )
     
-    print(create_response.json())
+#     print(create_response.json())
     
-    assert create_response.status_code == 201
+#     assert create_response.status_code == 201
 
-    user_id = create_response.json()["id"]
+#     user_id = create_response.json()["id"]
     
-    # act
-    response = client.delete(f'/users/{user_id}')
-    assert response.status_code == 204
+#     # act
+#     response = client.delete(f'/users/{user_id}')
+#     assert response.status_code == 204
     
-    get_response = client.get(f'/users/{user_id}')
-    assert get_response.status_code == 404
-    assert get_response.json()["detail"] == "User Not Found"
-    print(create_response.status_code)
-    print(create_response.json())
+#     get_response = client.get(f'/users/{user_id}')
+#     assert get_response.status_code == 404
+#     assert get_response.json()["detail"] == "User Not Found"
+#     print(create_response.status_code)

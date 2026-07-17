@@ -61,5 +61,5 @@ def delete_task(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    delete_task_service(db, task_id, current_user.id)
-    return None
+    return delete_task_service(db, task_id, current_user.id)
+    
