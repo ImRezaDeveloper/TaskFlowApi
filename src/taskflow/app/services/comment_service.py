@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.loggin import setup_logging
 from app.models.users import User
+from app.schemas.contract.comment_schema import CommentCreate
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ from app.crud.comment_repository import (
 # from taskflow.app.models.comments import Comment
 
 
-def create_comment_service(db, comment_create, current_user_id: UUID, task_id: UUID, board_id: UUID):
+def create_comment_service(db: AsyncSession, comment_create: CommentCreate, current_user_id: UUID, task_id: UUID, board_id: UUID):
 
     try:
         new_comment = create_comment_db(db, comment_create, current_user_id, task_id, board_id)
@@ -31,6 +32,8 @@ def create_comment_service(db, comment_create, current_user_id: UUID, task_id: U
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="there was an error in creating comment"
         )
+        
+    return new_comment
         
 def get_task_by_id_service(db, comment_id: UUID, current_user_id: UUID):
     logger.info(f"User {current_user_id} requested comment ID {comment_id}")
