@@ -6,7 +6,9 @@ from app.models.users import User
 from app.schemas.contract.comment_schema import CommentCreate, CommentUpdate, CommentResponse
 from app.services.comment_service import (
     create_comment_service,
-    get_comment_by_id_db
+    get_comment_by_id_db,
+    update_comment_service,
+    delete_comment_service
 )
 from app.db.database import get_db
 from app.services.auth_service import get_current_user
@@ -25,9 +27,27 @@ def create_comment(
 
 
 @router.get("/{comment_id}", status_code=status.HTTP_200_OK)
-def get_task(
+def get_comment(
     comment_id: UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return get_comment_by_id_db(db, comment_id, current_user)
+    return get_comment_by_id_db(db, comment_id)
+
+@router.patch('/{comment_id}', status_code=status.HTTP_200_OK)
+def update_comment(
+    comment_id: UUID,
+    comment_data: CommentUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return update_comment_service(db, comment_id, comment_data, current_user.id)
+
+@router.delete("/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_comment(
+    comment_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    await delete_comment_service(db, comment_id, current_user.id)  # ✅ await
+    return None

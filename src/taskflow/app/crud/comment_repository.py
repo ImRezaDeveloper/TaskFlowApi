@@ -29,7 +29,7 @@ def create_comment_db(
 
     return new_comment
 
-def get_comment_by_id_db(db: AsyncSession, comment_id: UUID, current_user_id: UUID) -> Optional[Comment]:
+async def get_comment_by_id_db(db: AsyncSession, comment_id: UUID) -> Optional[Comment]:
     query = select(Comment).where(Comment.id == comment_id)
     result = db.execute(query)
     return result.scalar_one_or_none()
@@ -60,8 +60,8 @@ def update_task_db(db: AsyncSession, task_id: UUID, update_data: TaskUpdate) -> 
     db.commit()
     db.refresh(task)
     return task
-def update_comment_db(db: AsyncSession, comment_id: UUID, update_data: CommentUpdate) -> Optional[Comment]:
-    comment = get_comment_by_id_db(db, comment_id)
+def update_comment_db(db: AsyncSession, comment_id: UUID, update_data: CommentUpdate, current_user_id: UUID) -> Optional[Comment]:
+    comment = get_comment_by_id_db(db, comment_id, current_user_id)
     
     if not comment:
         return None
@@ -75,12 +75,11 @@ def update_comment_db(db: AsyncSession, comment_id: UUID, update_data: CommentUp
     db.refresh(comment)
     return comment
 
-def delete_comment_db(db: AsyncSession, comment_id: UUID) -> bool:
-    comment = get_comment_by_id_db(db, comment_id)
-    
+async def delete_comment_db(db: AsyncSession, comment_id: UUID) -> bool:
+    comment = await get_comment_by_id_db(db, comment_id)
     if not comment:
-        return False
-        
+        return False  # ✅ حتماً bool برگردون
+    
     db.delete(comment)
     db.commit()
-    return True
+    return True  # ✅ حتماً bool برگردون
