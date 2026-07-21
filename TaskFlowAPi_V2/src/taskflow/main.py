@@ -1,17 +1,22 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import Settings
-from app.api.v1.endpints.auth_router import router as auth_router
-from app.api.v1.endpints.user_router import router as user_router
-from app.api.v1.endpints.task_router import router as task_router
-from app.api.v1.endpints.board_router import router as board_router
-from app.api.v1.endpints.comment_router import router as comment_router
-from app.core.loggin import setup_logging
-from app.db.database import Base, engine
+from src.taskflow.core.config import Settings
+from src.taskflow.api.v1.endpints.auth_router import router as auth_router
+from src.taskflow.api.v1.endpints.user_router import router as user_router
+from src.taskflow.api.v1.endpints.task_router import router as task_router
+from src.taskflow.api.v1.endpints.board_router import router as board_router
+from src.taskflow.api.v1.endpints.comment_router import router as comment_router
+from src.taskflow.core.loggin import setup_logging
+from src.taskflow.db.database import Base, engine
 
 setup_logging()
 
-Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
 
 
 app = FastAPI(
