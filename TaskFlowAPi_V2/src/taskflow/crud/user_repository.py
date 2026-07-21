@@ -8,22 +8,27 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.taskflow.schemas.contract.user_schema import UserUpdate
 
-def get_users_db(db: AsyncSession):
+async def get_users_db(db: AsyncSession) -> List[User]:
     query = select(User)
-    result = db.execute(query)
-    tasks = result.scalars().all()
-    
-    return tasks
+    result = await db.execute(query)  
+    return list(result.scalars().all())
 
-def verify_exists_user(db: AsyncSession, email: str) -> bool:
+
+async def verify_exists_user(db: AsyncSession, email: str) -> bool:
     stmt = select(User).where(User.email == email)
-
-    result = db.execute(stmt)
-
+    result = await db.execute(stmt)  
     return result.scalar_one_or_none() is not None
 
-def create_user_db(username, email, hashed_password, full_name, is_active, is_verified, get_db: AsyncSession = Depends(get_db)):
 
+async def create_user_db(
+    db: AsyncSession,
+    username: str,
+    email: str,
+    hashed_password: str,
+    full_name: str,
+    is_active: bool,
+    is_verified: bool
+) -> User:
     new_user = User(
         username=username,
         email=email,
@@ -33,45 +38,46 @@ def create_user_db(username, email, hashed_password, full_name, is_active, is_ve
         is_verified=is_verified
     )
     
-    get_db.add(new_user)
-    get_db.commit()
-    get_db.refresh(new_user)
+    db.add(new_user)
+    await db.commit()          
+    await db.refresh(new_user) 
     
     return new_user
 
-def get_user_by_id(db: AsyncSession, user_id: UUID):
-    stmt = select(User).where(User.id == user_id)
 
-    result = db.execute(stmt)
+async def get_user_by_id(db: AsyncSession, user_id: UUID) -> Optional[User]:
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)  
     return result.scalar_one_or_none()
 
-def update_user_db(
-    user_data: UserUpdate,
-    user: User,
+
+async def update_user_db(
     db: AsyncSession,
-):
+    user: User,
+    user_data: UserUpdate,
+) -> User:
     for key, value in user_data.model_dump(exclude_unset=True).items():
         setattr(user, key, value)
 
-    db.commit()
-    db.refresh(user)
+    await db.commit()          
+    await db.refresh(user)     
 
     return user
 
-def delete_user_db(db: AsyncSession, user_id: UUID):
-    user = get_user_by_id(db, user_id)
+
+async def delete_user_db(db: AsyncSession, user_id: UUID) -> Optional[User]:
+    user = await get_user_by_id(db, user_id)  
 
     if user is None:
         return None
 
-    db.delete(user)
-    db.commit()
+    await db.delete(user)      
+    await db.commit()          
 
     return user
 
-def get_user_by_email(db: AsyncSession, email: str):
+
+async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
     stmt = select(User).where(User.email == email)
-
-    result = db.execute(stmt)
-
+    result = await db.execute(stmt)  
     return result.scalar_one_or_none()

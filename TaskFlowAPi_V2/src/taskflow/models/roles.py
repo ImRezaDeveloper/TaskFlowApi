@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
-from taskflow.src.taskflow.db.database import Base
+from src.taskflow.db.database import Base
 
 class Roles(Base):
     __tablename__ = "roles"
