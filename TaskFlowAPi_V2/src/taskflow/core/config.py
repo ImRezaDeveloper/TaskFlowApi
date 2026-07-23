@@ -36,3 +36,4 @@ class Settings(BaseSettings):
 settings = Settings()
 
 DATABASE_URL = f"postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+TEST_DATABASE_URL = "postgresql+asyncpg://postgres:rezapapi1384@localhost:5433/test_db"

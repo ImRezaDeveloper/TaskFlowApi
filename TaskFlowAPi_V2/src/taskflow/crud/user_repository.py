@@ -1,3 +1,4 @@
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import Depends
@@ -21,13 +22,13 @@ async def verify_exists_user(db: AsyncSession, email: str) -> bool:
 
 
 async def create_user_db(
-    db: AsyncSession,
     username: str,
     email: str,
     hashed_password: str,
     full_name: str,
     is_active: bool,
-    is_verified: bool
+    is_verified: bool,
+    db: AsyncSession
 ) -> User:
     new_user = User(
         username=username,

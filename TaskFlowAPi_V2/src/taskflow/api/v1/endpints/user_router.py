@@ -19,38 +19,41 @@ router = APIRouter(
 )
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=List[UserResponse])
-def list_users(db: AsyncSession = Depends(get_db)):
-    return get_users(db)
+async def list_users(db: AsyncSession = Depends(get_db)):
+    return await get_users(db)
 
 
 @router.get("/me")
-def read_me(current_user = Depends(get_current_user)):
-    return current_user
+async def read_me(current_user = Depends(get_current_user)):
+    return await current_user
 
 @router.get("/{user_id}")
-def get_user(
+async def get_user(
     user_id: UUID,
     # current_user = Depends(get_current_user),
     get_db: AsyncSession = Depends(get_db),
 ):
-    return get_user_id(user_id, get_db)
+    return await get_user_id(user_id, get_db)
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def add_user(user: UserCreate, get_db: AsyncSession = Depends(get_db)):
-    return create_user(
-        username=user.username,
-        email=user.email,
-        hashed_password = hash_pwd(user.password),
-        full_name=user.full_name,
-        is_active=user.is_active,
-        is_verified=user.is_verified,
-        get_db=get_db
+async def add_user(
+    user_data: UserCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    return await create_user(
+        username=user_data.username,
+        email=user_data.email,
+        hashed_password=hash_pwd(user_data.password),
+        full_name=user_data.full_name,
+        is_active=user_data.is_active,
+        is_verified=user_data.is_verified,
+        db=db
     )
 
 @router.put("/{user_id}", status_code=status.HTTP_200_OK)
-def edit_user(user_id: UUID, user_data: UserUpdate, db: AsyncSession = Depends(get_db)):
-    return update_user(user_id, user_data, db)
+async def edit_user(user_id: UUID, user_data: UserUpdate, db: AsyncSession = Depends(get_db)):
+    return await update_user(user_id, user_data, db)
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
-    return delete_user(user_id, db)
+async def remove_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    return await delete_user(user_id, db)

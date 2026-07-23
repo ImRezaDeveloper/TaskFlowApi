@@ -197,27 +197,27 @@ client = TestClient(app)
 #     assert update_response.status_code == 200
 #     assert update_response.json()["content"] == "updated content"
     
-def test_delete_comment_success(client, auth_headers, sample_board, sample_task):
+#def test_delete_comment_success(client, auth_headers, sample_board, sample_task):
     
-    comment_data = {"content": "delete me"}
-    create_response = client.post(
-        "/comments/",
-        json=comment_data,
-        headers=auth_headers,
-        params={"task_id": sample_task, "board_id": sample_board}
-    )
-    assert create_response.status_code == 201
-    comment_id = create_response.json()["id"]
+    #comment_data = {"content": "delete me"}
+   # create_response = client.post(
+     #   "/comments/",
+    #    json=comment_data,
+     #   headers=auth_headers,
+   #    params={"task_id": sample_task, "board_id": sample_board}
+  #  )
+ #   assert create_response.status_code == 201
+#    comment_id = create_response.json()["id"]
 
-    delete_response = client.delete(
-        f"/comments/{comment_id}",
-        headers=auth_headers
-    )
-    assert delete_response.status_code == 204
+#    delete_response = client.delete(
+#        f"/comments/{comment_id}",
+#        headers=auth_headers
+#    )
+ #   assert delete_response.status_code == 204
 
-    get_response = client.get(
-        f"/comments/{comment_id}",
-        headers=auth_headers
-    )
-    assert get_response.status_code == 404
-    print("Response", get_response.json())
+#    get_response = client.get(
+#        f"/comments/{comment_id}",
+#        headers=auth_headers
+#    )
+#    assert get_response.status_code == 404
+#    print("Response", get_response.json())

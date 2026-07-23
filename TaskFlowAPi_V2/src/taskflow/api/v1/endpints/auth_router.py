@@ -12,16 +12,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter(tags=['auth'], prefix='/auth')
 
 @router.post("/login", response_model=Token)
-def login_for_access_token(
+async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
-    return authenticate_user(
+    return await authenticate_user(
         email=form_data.username,
         password=form_data.password,
         db=db
     )
 
 @router.post("/refresh", response_model=Token)
-def refresh_token(data: RefreshRequest, conn = Depends(get_db)):
-    return verify_refresh_token(data, conn)
+async def refresh_token(data: RefreshRequest, conn = Depends(get_db)):
+    return await verify_refresh_token(data, conn)

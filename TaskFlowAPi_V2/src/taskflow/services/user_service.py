@@ -1,6 +1,5 @@
 import logging
 from uuid import UUID
-
 from fastapi import Depends, FastAPI, HTTPException
 from starlette import status
 from src.taskflow.core.security import hash_pwd
@@ -17,10 +16,10 @@ def get_users(db: AsyncSession):
     users = get_users_db(db)
     return users
 
-def get_user_by_id(user_id: UUID, db: AsyncSession) -> User:
+async def get_user_by_id(user_id: UUID, db: AsyncSession) -> User:
     # logger.info(f"User {current_user_id} requested Uesr ID {user_id}")
     
-    existing_user = get_user_id(db, user_id)
+    existing_user = await get_user_id(db, user_id)
     
     if not existing_user:
         raise HTTPException(
@@ -30,14 +29,14 @@ def get_user_by_id(user_id: UUID, db: AsyncSession) -> User:
         
     return existing_user
     
-def create_user(username: str, email: str, hashed_password: str, full_name: str, is_active: bool, is_verified: bool, get_db):
+async def create_user(username: str, email: str, hashed_password: str, full_name: str, is_active: bool, is_verified: bool, db: AsyncSession):
     
     # validate_email_availability(email, get_db)
     hash_pwd(hashed_password)
-    return create_user_db(username, email, hashed_password, full_name, is_active, is_verified, get_db)
+    return await create_user_db(username, email, hashed_password, full_name, is_active, is_verified, db)
 
-def update_user(user_id: UUID, user_data: UserUpdate, db: AsyncSession):
-    user = get_user_id(db, user_id)
+async def update_user(user_id: UUID, user_data: UserUpdate, db: AsyncSession):
+    user = await get_user_by_id(user_id, db)  # ✅ اینجا await رو اضافه کن
     
     if not user:
         raise HTTPException(
@@ -45,11 +44,11 @@ def update_user(user_id: UUID, user_data: UserUpdate, db: AsyncSession):
             detail="User not found"
         )
         
-    return update_user_db(user_data, user, db)
+    return await update_user_db(db, user, user_data)
 
-def delete_user(user_id: UUID, db: AsyncSession):
+async def delete_user(user_id: UUID, db: AsyncSession):
     
-    user = get_user_by_id(user_id, db)
+    user = await get_user_by_id(user_id, db)
     
     if not user:
         raise HTTPException(
@@ -57,4 +56,4 @@ def delete_user(user_id: UUID, db: AsyncSession):
             detail="User not found"
         )
         
-    return delete_user_db(db, user_id)
+    return await delete_user_db(db, user_id)
