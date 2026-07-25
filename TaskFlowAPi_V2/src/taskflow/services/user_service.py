@@ -36,7 +36,7 @@ async def create_user(username: str, email: str, hashed_password: str, full_name
     return await create_user_db(username, email, hashed_password, full_name, is_active, is_verified, db)
 
 async def update_user(user_id: UUID, user_data: UserUpdate, db: AsyncSession):
-    user = await get_user_by_id(user_id, db)  # ✅ اینجا await رو اضافه کن
+    user = await get_user_by_id(user_id, db)
     
     if not user:
         raise HTTPException(

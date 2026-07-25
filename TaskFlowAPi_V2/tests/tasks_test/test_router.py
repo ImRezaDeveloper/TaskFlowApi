@@ -1,72 +1,52 @@
 from uuid import uuid4, UUID
 from fastapi.testclient import TestClient
 from src.taskflow.main import app
-from tests.fixture import auth_headers
+from tests.fixture.auth_headers import auth_headers
 
 client = TestClient(app)
 
-# def test_create_task_success(client, auth_headers):
-    
-#     user_data = {
-#         "username": "fardad",
-#         "email": "fardad@example.com",
-#         "password": "StrongPassword123!",
-#         "full_name": "Fadad",
-#         "is_active": True,
-#         "is_verified": False
-#     }
+def test_create_task_success(client, auth_headers):
+    user_id = auth_headers["user_id"]
 
-#     response = client.post(
-#         "/users/",
-#         json=user_data
-#     )
+    # board
+    board_data = {
+        "name": "daily english",
+        "description": "this board has created for plannig your tasks",
+    }
 
-#     print("Status Code:", response.status_code)
-#     print("Response JSON:", response.json())
-    
-#     user_id = response.json()['id']
-    
-#     assert response.status_code == 201
-    
-#     # board
-#     board_data = {
-#         "name": "daily english",
-#         "description": "this board has created for plannig your tasks",
-#     }
+    create_response = client.post(
+        "/boards/",
+        json=board_data,
+        headers=auth_headers
+    )
 
-#     create_response = client.post(
-#         "/boards/",
-#         json=board_data,
-#         headers=auth_headers
-#     )
+    print("Status Code:", create_response.status_code)
+    print("Response JSON:", create_response.json())
+    
+    board_id = create_response.json()['id']
+    
+    assert create_response.status_code == 201
+    
+    task_data = {
+        "title": "learn english",
+        "description": "learnig english with tifani",
+        "status": "in_progress",
+        "priority": "high",
+        "due_date": "2026-07-10 14:47:03.397",
+        "user_id": f"{user_id}",
+        "board_id": f"{board_id}"
+    }
 
-#     print("Status Code:", create_response.status_code)
-#     print("Response JSON:", create_response.json())
-    
-#     board_id = create_response.json()['id']
-    
-#     assert create_response.status_code == 201
-    
-#     task_data = {
-#         "title": "learn english",
-#         "description": "learnig english with tifani",
-#         "status": "in_progress",
-#         "priority": "high",
-#         "due_date": "2026-07-10 14:47:03.397",
-#         "user_id": f"{user_id}",
-#         "board_id": f"{board_id}"
-#     }
+    response = client.post(
+        "/tasks/",
+        json=task_data,
+        headers=auth_headers
+    )
 
-#     response = client.post(
-#         "/tasks/",
-#         json=task_data,
-#         headers=auth_headers
-#     )
-
-#     print("Status Code:", response.status_code)
-#     print("Response JSON:", response.json())
+    print("Status Code:", response.status_code)
+    print("Response JSON:", response.json())
     
-#     assert response.status_code == 201
+    assert response.status_code == 201
     
 # def test_get_task_success(client, auth_headers):
     

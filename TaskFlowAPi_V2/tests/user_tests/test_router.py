@@ -6,12 +6,14 @@ import pytest
 
 client = TestClient(app)
 
-# def test_create_user_success():
+# successfull test!
+# def test_create_user_success(client):
+
 #     user_data = {
-#         "username": "fardad",
-#         "email": f"{uuid4().hex[:8]}@example.com",
+#         "username": "shakiba",
+#         "email": f"{uuid4().hex[:8]}@test.com",
 #         "password": "StrongPassword123!",
-#         "full_name": "rezapapi",
+#         "full_name": "shakiba",
 #         "is_active": True,
 #         "is_verified": False
 #     }
@@ -21,18 +23,19 @@ client = TestClient(app)
 #         json=user_data
 #     )
 
-#     # چاپ کردن خطا برای دیباگ
 #     print("Status Code:", response.status_code)
-#     print("Response JSON:", response.json())  # این خط رو اضافه کن
+#     print("Response JSON:", response.json())
     
 #     assert response.status_code == 201
+
+# successfull test!
 # def test_get_user_success(client):
 
 #     user_data = {
-#         "username": "fardad",
-#         "email": "fardad@test.com",
+#         "username": "sima",
+#         "email": "sima@test.com",
 #         "password": "StrongPassword123!",
-#         "full_name": "fardad",
+#         "full_name": "sima",
 #         "is_active": True,
 #         "is_verified": False,
 #     }
@@ -47,14 +50,15 @@ client = TestClient(app)
 
 #     assert response.status_code == 200
 #     assert response.json()["id"] == user_id
-#     assert response.json()["username"] == "fardad"
-    
-# def test_update_user_success(client, db_session):
+#     assert response.json()["username"] == "sima"
+
+# successfull test!
+# def test_update_user_success(client):
 #     user_data = {
-#         "username": "parviz",
-#         "email": "parviz@test.com",
+#         "username": "shokoh",
+#         "email": "shokoh@test.com",
 #         "password": "StrongPassword423!",
-#         "full_name": "parviz",
+#         "full_name": "shokoh",
 #         "is_active": True,
 #         "is_verified": False,
 #     }
@@ -74,36 +78,35 @@ client = TestClient(app)
 #     assert updated_user["id"] == user_id
 #     assert updated_user["username"] == "nima"
 
+# successfull test!
+# def test_delete_user_success(client):
+    
+#     # arrange
+#     user_data = {
+#         "username": "farshad",
+#         "email": "farshad@test.com",
+#         "password": "StrongPassword423!",
+#         "full_name": "farshad",
+#         "is_active": True,
+#         "is_verified": False,
+#     }
 
+#     create_response = client.post(
+#         "/users/",
+#         json=user_data
+#     )
     
-def test_delete_user_success(client):
+#     print(create_response.json())
     
-    # arrange
-    user_data = {
-        "username": "farshad",
-        "email": "farshad@test.com",
-        "password": "StrongPassword423!",
-        "full_name": "farshad",
-        "is_active": True,
-        "is_verified": False,
-    }
+#     assert create_response.status_code == 201
 
-    create_response = client.post(
-        "/users/",
-        json=user_data
-    )
+#     user_id = create_response.json()["id"]
     
-    print(create_response.json())
+#     # act
+#     response = client.delete(f'/users/{user_id}')
+#     assert response.status_code == 204
     
-    assert create_response.status_code == 201
-
-    user_id = create_response.json()["id"]
-    
-    # act
-    response = client.delete(f'/users/{user_id}')
-    assert response.status_code == 204
-    
-    get_response = client.get(f'/users/{user_id}')
-    assert get_response.status_code == 404
-    assert get_response.json()["detail"] == "User not found"
-    print(create_response.status_code)
+#     get_response = client.get(f'/users/{user_id}')
+#     assert get_response.status_code == 404
+#     assert get_response.json()["detail"] == "User not found"
+#     print(create_response.status_code)

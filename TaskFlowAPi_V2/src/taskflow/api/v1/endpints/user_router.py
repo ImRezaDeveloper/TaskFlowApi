@@ -25,7 +25,7 @@ async def list_users(db: AsyncSession = Depends(get_db)):
 
 @router.get("/me")
 async def read_me(current_user = Depends(get_current_user)):
-    return await current_user
+    return current_user
 
 @router.get("/{user_id}")
 async def get_user(

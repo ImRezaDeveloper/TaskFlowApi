@@ -17,10 +17,10 @@ from src.taskflow.models.tasks import Task
 logger = logging.getLogger("taskflow.services.tasks")
 
 
-def create_task_service(db: AsyncSession, task_data: TaskCreate, current_user_id: UUID) -> Task:
+async def create_task_service(db: AsyncSession, task_data: TaskCreate, current_user_id: UUID) -> Task:
     # logger.info(f"User {current_user_id} is attempting to create a task in board {task_data.board_id}")
     try:
-        new_task = create_task_db(db, task_data, current_user_id)
+        new_task = await create_task_db(db, task_data, current_user_id)
         logger.info(f"Task successfully created with ID {new_task.id} by user {current_user_id}")
         return new_task
     except Exception as e:
@@ -31,10 +31,10 @@ def create_task_service(db: AsyncSession, task_data: TaskCreate, current_user_id
         )
 
 
-def get_task_by_id_service(db: AsyncSession, task_id: UUID, current_user_id: UUID) -> Task:
+async def get_task_by_id_service(db: AsyncSession, task_id: UUID, current_user_id: UUID) -> Task:
     logger.info(f"User {current_user_id} requested task ID {task_id}")
     
-    task = get_task_by_id_db(db, task_id)
+    task = await get_task_by_id_db(db, task_id)
     
     if not task:
         logger.warning(f"Task ID {task_id} not found in database.")
@@ -50,7 +50,7 @@ def get_task_by_id_service(db: AsyncSession, task_id: UUID, current_user_id: UUI
             detail="you don't have permission to do this!"
         )
         
-    return task
+    return await task
 
 async def get_board_tasks_service(db: AsyncSession, board_id: UUID, current_user_id: UUID, skip: int = 0, limit: int = 100) -> List[Task]:
     logger.info(f"User {current_user_id} fetching tasks for board {board_id} with limit={limit}")
@@ -65,15 +65,15 @@ async def get_board_tasks_service(db: AsyncSession, board_id: UUID, current_user
         )
 
 
-def update_task_service(db: AsyncSession, task_id: UUID, update_data: TaskUpdate, current_user_id: UUID) -> Task:
+async def update_task_service(db: AsyncSession, task_id: UUID, update_data: TaskUpdate, current_user_id: UUID) -> Task:
     logger.info(f"User {current_user_id} attempting to update task {task_id}")
     
-    get_task_by_id_service(db, task_id, current_user_id)
+    await get_task_by_id_service(db, task_id, current_user_id)
     
     try:
-        updated_task = update_task_db(db, task_id, update_data)
+        updated_task = await update_task_db(db, task_id, update_data)
         logger.info(f"Task {task_id} successfully updated by user {current_user_id}")
-        return updated_task
+        return await updated_task
     except Exception as e:
         logger.error(f"Error updating task {task_id}: {str(e)}", exc_info=True)
         raise HTTPException(
@@ -82,10 +82,10 @@ def update_task_service(db: AsyncSession, task_id: UUID, update_data: TaskUpdate
         )
 
 
-def delete_task_service(db: AsyncSession, task_id: UUID, current_user_id: UUID) -> bool:
+async def delete_task_service(db: AsyncSession, task_id: UUID, current_user_id: UUID) -> bool:
     logger.info(f"User {current_user_id} attempting to delete task {task_id}")
     
-    task = get_task_by_id_service(db, task_id, current_user_id)
+    task = await get_task_by_id_service(db, task_id, current_user_id)
     
     if not task:
         raise HTTPException(
@@ -93,4 +93,4 @@ def delete_task_service(db: AsyncSession, task_id: UUID, current_user_id: UUID) 
             detail="Task not found"
         )
         
-    return delete_task_db(db, task_id)
+    return await delete_task_db(db, task_id)

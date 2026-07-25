@@ -6,8 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from src.taskflow.main import app
 from src.taskflow.db.database import Base, get_db
 from src.taskflow.core.config import settings
-from sqlalchemy import create_engine
-import pytest_asyncio
+from tests.fixture.auth_headers import auth_headers
 
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
@@ -52,9 +51,8 @@ TestingSessionLocal = async_sessionmaker(
 
 #     Base.metadata.drop_all(bind=engine)
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def client():
-
     async def override_get_db():
         async with TestingSessionLocal() as session:
             yield session
@@ -66,30 +64,13 @@ def client():
 
     app.dependency_overrides.clear()
 
-@pytest.fixture(scope="session")
-def auth_headers(client):
-    user_data = {
-        "username": "vahid",
-        "email": "vahid@test.com",
-        "password": "StrongPassword123!",
-        "full_name": "Vahid",
-        "is_active": True,
-        "is_verified": False
-    }
-    register_response = client.post("/users/", json=user_data)
-    if register_response.status_code != 201:
-        raise Exception(f"User registration failed: {register_response.json()}")
-
-    login_data = {
-        "username": "vahid@test.com",
-        "password": "StrongPassword123!"
-    }
-    login_response = client.post("/auth/login", json=login_data)
-    if login_response.status_code != 200:
-        raise Exception(f"Login failed: {login_response.json()}")
-    
-    access_token = login_response.json()["access_token"]
-    return {"Authorization": f"Bearer {access_token}"}
+# @pytest.fixture
+# def test_db_session(test_engine):
+#     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+#     session = SessionLocal()
+#     yield session
+#     session.rollback()
+#     session.close()
 
 @pytest.fixture
 def sample_board(client, auth_headers):
