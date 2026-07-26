@@ -66,7 +66,8 @@ class Task(Base):
     comments = relationship(
         "Comment",
         back_populates="task",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy="selectin"
     )
     
     def __repr__(self) -> str:

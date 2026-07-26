@@ -26,12 +26,12 @@ async def create_task(
 
 
 @router.get("/{task_id}", response_model=TaskResponse, status_code=status.HTTP_200_OK)
-def get_task(
+async def get_task(
     task_id: UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return get_task_by_id_service(db, task_id, current_user.id)
+    return await get_task_by_id_service(db, task_id, current_user.id)
 
 
 @router.get("/board/{board_id}", response_model=List[TaskResponse], status_code=status.HTTP_200_OK)
@@ -46,20 +46,20 @@ async def get_board_tasks(
 
 
 @router.patch("/{task_id}", status_code=status.HTTP_200_OK)
-def update_task(
+async def update_task(
     task_id: UUID,
     update_data: TaskUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return update_task_service(db, task_id, update_data, current_user.id)
+    return await update_task_service(db, task_id, update_data, current_user.id)
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(
+async def delete_task(
     task_id: UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return delete_task_service(db, task_id, current_user.id)
+    return await delete_task_service(db, task_id, current_user.id)
     

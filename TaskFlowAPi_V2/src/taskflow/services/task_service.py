@@ -50,7 +50,7 @@ async def get_task_by_id_service(db: AsyncSession, task_id: UUID, current_user_i
             detail="you don't have permission to do this!"
         )
         
-    return await task
+    return task
 
 async def get_board_tasks_service(db: AsyncSession, board_id: UUID, current_user_id: UUID, skip: int = 0, limit: int = 100) -> List[Task]:
     logger.info(f"User {current_user_id} fetching tasks for board {board_id} with limit={limit}")
@@ -73,7 +73,7 @@ async def update_task_service(db: AsyncSession, task_id: UUID, update_data: Task
     try:
         updated_task = await update_task_db(db, task_id, update_data)
         logger.info(f"Task {task_id} successfully updated by user {current_user_id}")
-        return await updated_task
+        return updated_task
     except Exception as e:
         logger.error(f"Error updating task {task_id}: {str(e)}", exc_info=True)
         raise HTTPException(

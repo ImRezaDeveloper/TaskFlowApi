@@ -17,15 +17,21 @@ from src.taskflow.crud.comment_repository import (
     update_comment_db,
     delete_comment_db
 )
-# from taskflow.src.taskflow.schemas.contract.comment_schema import CommentCreate, CommentUpdate
-# from taskflow.src.taskflow.models.comments import Comment
 
 
-def create_comment_service(db: AsyncSession, comment_create: CommentCreate, current_user_id: UUID, task_id: UUID, board_id: UUID):
-
+async def create_comment_service(  
+    db: AsyncSession,
+    comment_create: CommentCreate,
+    current_user_id: UUID,
+    task_id: UUID,
+    board_id: UUID,
+):
     try:
-        new_comment = create_comment_db(db, comment_create, current_user_id, task_id, board_id)
+        new_comment = await create_comment_db(  
+            db, comment_create, current_user_id, task_id, board_id
+        )
         logger.info(f"Comment successfully created with ID {new_comment.id} by user {current_user_id}")
+        return new_comment
     except Exception as e:
         logger.error(f"Failed to create comment for user {current_user_id}: {str(e)}", exc_info=True)
         raise HTTPException(
@@ -33,12 +39,14 @@ def create_comment_service(db: AsyncSession, comment_create: CommentCreate, curr
             detail="there was an error in creating comment"
         )
         
-    return new_comment
-        
-def get_task_by_id_service(db, comment_id: UUID, current_user_id: UUID):
+async def get_comment_by_id_service(
+    db: AsyncSession,
+    comment_id: UUID,
+    current_user_id: UUID,
+):
     logger.info(f"User {current_user_id} requested comment ID {comment_id}")
     
-    comment = get_comment_by_id_db(db, comment_id)
+    comment = await get_comment_by_id_db(db, comment_id)  
     
     if not comment:
         logger.warning(f"Comment ID {comment_id} not found in database.")
@@ -56,14 +64,16 @@ def get_task_by_id_service(db, comment_id: UUID, current_user_id: UUID):
         
     return comment
 
-def update_comment_service(
+async def update_comment_service(  
     db: AsyncSession,
     comment_id: UUID,
     update_data: CommentUpdate,
     current_user_id: UUID,
 ):
     try:
-        comment = update_comment_db(db, comment_id, update_data, current_user_id)
+        comment = await update_comment_db(  
+            db, comment_id, update_data, current_user_id
+        )
         
         if not comment:
             logger.warning(f"Comment {comment_id} not found for update by user {current_user_id}")
@@ -91,14 +101,13 @@ def update_comment_service(
             detail="There was an error updating the comment"
         )
 
-async def delete_comment_service(
+async def delete_comment_service(  
     db: AsyncSession, 
     comment_id: UUID, 
     current_user_id: UUID
 ) -> bool:
     try:
-        # ✅ اینجا await رو اضافه کن
-        comment = await get_comment_by_id_db(db, comment_id)
+        comment = await get_comment_by_id_db(db, comment_id)  
         
         if not comment:
             raise HTTPException(status_code=404, detail="Comment not found")
@@ -106,8 +115,7 @@ async def delete_comment_service(
         if comment.author_id != current_user_id:
             raise HTTPException(status_code=403, detail="Permission denied")
         
-        # ✅ اینجا هم await رو اضافه کن
-        result = await delete_comment_db(db, comment_id)
+        result = await delete_comment_db(db, comment_id)  
         
         if not result:
             raise HTTPException(status_code=500, detail="Failed to delete comment")

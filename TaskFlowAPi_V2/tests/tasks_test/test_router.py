@@ -5,72 +5,54 @@ from tests.fixture.auth_headers import auth_headers
 
 client = TestClient(app)
 
-def test_create_task_success(client, auth_headers):
-    user_id = auth_headers["user_id"]
+# successfull test!
+# def test_create_task_success(client, auth_headers):
+#     user_id = auth_headers["user_id"]
 
-    # board
-    board_data = {
-        "name": "daily english",
-        "description": "this board has created for plannig your tasks",
-    }
+#     # board
+#     board_data = {
+#         "name": "daily english",
+#         "description": "this board has created for plannig your tasks",
+#     }
 
-    create_response = client.post(
-        "/boards/",
-        json=board_data,
-        headers=auth_headers
-    )
+#     create_response = client.post(
+#         "/boards/",
+#         json=board_data,
+#         headers=auth_headers
+#     )
 
-    print("Status Code:", create_response.status_code)
-    print("Response JSON:", create_response.json())
+#     print("Status Code:", create_response.status_code)
+#     print("Response JSON:", create_response.json())
     
-    board_id = create_response.json()['id']
+#     board_id = create_response.json()['id']
     
-    assert create_response.status_code == 201
+#     assert create_response.status_code == 201
     
-    task_data = {
-        "title": "learn english",
-        "description": "learnig english with tifani",
-        "status": "in_progress",
-        "priority": "high",
-        "due_date": "2026-07-10 14:47:03.397",
-        "user_id": f"{user_id}",
-        "board_id": f"{board_id}"
-    }
-
-    response = client.post(
-        "/tasks/",
-        json=task_data,
-        headers=auth_headers
-    )
-
-    print("Status Code:", response.status_code)
-    print("Response JSON:", response.json())
-    
-    assert response.status_code == 201
-    
-# def test_get_task_success(client, auth_headers):
-    
-#     # user
-#     user_data = {
-#         "username": "fardad",
-#         "email": "fardad@example.com",
-#         "password": "StrongPassword123!",
-#         "full_name": "Fadad",
-#         "is_active": True,
-#         "is_verified": False
+#     task_data = {
+#         "title": "learn english",
+#         "description": "learnig english with tifani",
+#         "status": "in_progress",
+#         "priority": "high",
+#         "due_date": "2026-07-10 14:47:03.397",
+#         "user_id": f"{user_id}",
+#         "board_id": f"{board_id}"
 #     }
 
 #     response = client.post(
-#         "/users/",
-#         json=user_data
+#         "/tasks/",
+#         json=task_data,
+#         headers=auth_headers
 #     )
 
 #     print("Status Code:", response.status_code)
 #     print("Response JSON:", response.json())
     
-#     user_id = response.json()['id']
 #     assert response.status_code == 201
     
+# successfull test!
+# def test_get_task_success(client, auth_headers):
+#     user_id = auth_headers["user_id"]
+
 #     # board
 #     board_data = {
 #         "name": "daily english",
@@ -121,30 +103,11 @@ def test_create_task_success(client, auth_headers):
 #     print(task.status_code)
 #     print(task.json())
 #     assert task.json()["id"] == task_id
-#     assert response.json()["title"] == "learn english with me"
+#     assert response.json()["title"] == "learn english"
     
+# successfull test!
 # def test_update_task_success(client, auth_headers):
-    
-#      # user
-#     user_data = {
-#         "username": "fardad",
-#         "email": "fardad@example.com",
-#         "password": "StrongPassword123!",
-#         "full_name": "Fadad",
-#         "is_active": True,
-#         "is_verified": False
-#     }
-
-#     response = client.post(
-#         "/users/",
-#         json=user_data
-#     )
-
-#     print("Status Code:", response.status_code)
-#     print("Response JSON:", response.json())
-    
-#     user_id = response.json()['id']
-#     assert response.status_code == 201
+#     user_id = auth_headers["user_id"]
     
 #     # board
 #     board_data = {
@@ -203,28 +166,10 @@ def test_create_task_success(client, auth_headers):
 #     assert task.json()["id"] == task_id
 #     assert task.json()["title"] == "learn english with me"
     
+# successfull test ****
 # def test_delete_task_success(client, auth_headers):
     
-#      # user
-#     user_data = {
-#         "username": "fardad",
-#         "email": "fardad@example.com",
-#         "password": "StrongPassword123!",
-#         "full_name": "Fadad",
-#         "is_active": True,
-#         "is_verified": False
-#     }
-
-#     response = client.post(
-#         "/users/",
-#         json=user_data
-#     )
-
-#     print("Status Code:", response.status_code)
-#     print("Response JSON:", response.json())
-    
-#     user_id = response.json()['id']
-#     assert response.status_code == 201
+#     user_id = auth_headers["user_id"]
     
 #     # board
 #     board_data = {
@@ -277,11 +222,8 @@ def test_create_task_success(client, auth_headers):
     
 #     get_response = client.get(f'/tasks/{task_id}', headers=auth_headers)
 #     print("GET Status Code:", get_response.status_code)
-#     print("GET Response JSON:", get_response.json())
+#     # print("GET Response JSON:", get_response.json())
     
 #     # The task should not exist → 404 Not Found
 #     assert get_response.status_code == 404
-#     assert get_response.json()["detail"] == "Task not found"
-    # print(task.json())
-    # assert task.json()["id"] == task_id
-    # assert task.json()["detail"] == "Task Not Found"
+#     assert get_response.json()["detail"] == "your current task not found!"

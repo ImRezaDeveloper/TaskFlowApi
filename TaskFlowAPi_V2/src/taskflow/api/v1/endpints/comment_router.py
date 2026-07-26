@@ -6,7 +6,7 @@ from src.taskflow.models.users import User
 from src.taskflow.schemas.contract.comment_schema import CommentCreate, CommentUpdate, CommentResponse
 from src.taskflow.services.comment_service import (
     create_comment_service,
-    get_comment_by_id_db,
+    get_comment_by_id_service,
     update_comment_service,
     delete_comment_service
 )
@@ -16,32 +16,48 @@ router = APIRouter(prefix="/comments", tags=["Comments"])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_comment(
+async def create_comment(
     task_id: UUID,
     board_id: UUID,
     comment_data: CommentCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return create_comment_service(db, comment_data, current_user.id, task_id, board_id)
+    return await create_comment_service(
+        db, 
+        comment_data, 
+        current_user.id, 
+        task_id, 
+        board_id
+    )
 
 
 @router.get("/{comment_id}", status_code=status.HTTP_200_OK)
-def get_comment(
+async def get_comment(
     comment_id: UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return get_comment_by_id_db(db, comment_id)
+    return await get_comment_by_id_service(
+        db, 
+        comment_id,
+        current_user.id
+    )
 
-@router.patch('/{comment_id}', status_code=status.HTTP_200_OK)
-def update_comment(
+@router.patch("/{comment_id}", status_code=status.HTTP_200_OK)
+async def update_comment(
     comment_id: UUID,
     comment_data: CommentUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return update_comment_service(db, comment_id, comment_data, current_user.id)
+    return await update_comment_service(
+        db, 
+        comment_id, 
+        comment_data, 
+        current_user.id
+    )
+
 
 @router.delete("/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_comment(
@@ -49,5 +65,5 @@ async def delete_comment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    await delete_comment_service(db, comment_id, current_user.id)  # ✅ await
+    await delete_comment_service(db, comment_id, current_user.id)
     return None
