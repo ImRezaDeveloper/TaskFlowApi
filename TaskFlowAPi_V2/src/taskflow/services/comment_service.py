@@ -1,15 +1,11 @@
-import logging
+from src.taskflow.core.loggin import logger
 from uuid import UUID
 from typing import List
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.taskflow.core.loggin import setup_logging
+# from src.taskflow.core.loggin import setup_logging
 from src.taskflow.models.users import User
 from src.taskflow.schemas.contract.comment_schema import CommentCreate, CommentUpdate
-
-setup_logging()
-logger = logging.getLogger(__name__)
-
 from src.taskflow.crud.comment_repository import (
     create_comment_db,
     get_comment_by_id_db,
@@ -19,6 +15,8 @@ from src.taskflow.crud.comment_repository import (
 )
 
 
+# logger = structlog.getLogger(__name__)
+
 async def create_comment_service(  
     db: AsyncSession,
     comment_create: CommentCreate,
@@ -26,42 +24,87 @@ async def create_comment_service(
     task_id: UUID,
     board_id: UUID,
 ):
+    logger.info(
+        "create_comment_started",
+        extra={
+            "user_id": str(current_user_id),
+            "task_id": str(task_id),
+            "board_id": str(board_id),
+        }
+    )
+
     try:
         new_comment = await create_comment_db(  
             db, comment_create, current_user_id, task_id, board_id
         )
-        logger.info(f"Comment successfully created with ID {new_comment.id} by user {current_user_id}")
+        logger.info(
+            "create_comment_completed",
+            extra={
+                "comment_id":str(new_comment.id),
+                "user_id":str(current_user_id),
+                "task_id":str(task_id)
+            }
+        )
+
         return new_comment
     except Exception as e:
-        logger.error(f"Failed to create comment for user {current_user_id}: {str(e)}", exc_info=True)
+        logger.error(
+            "create_comment_failed",
+            extra={
+                "user_id": str(current_user_id),
+                "task_id": str(task_id),
+                "error": str(e),
+                "exc_info": True
+            }
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="there was an error in creating comment"
         )
         
-async def get_comment_by_id_service(
-    db: AsyncSession,
-    comment_id: UUID,
-    current_user_id: UUID,
-):
-    logger.info(f"User {current_user_id} requested comment ID {comment_id}")
+async def get_comment_by_id_service(db: AsyncSession, comment_id: UUID,current_user_id: UUID):
+
+    logger.info(
+        "get_comment_started",
+        extra={
+            "comment_id": str(comment_id),
+            "user_id": str(current_user_id)
+        }
+    )
     
     comment = await get_comment_by_id_db(db, comment_id)  
+
     
     if not comment:
-        logger.warning(f"Comment ID {comment_id} not found in database.")
+        logger.warning(
+            "get_comment_failed",
+            comment_id=str(comment_id),
+            user_id=str(current_user_id),
+            reason="comment_not_found"
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="your current comment not found!"
         )
         
     if comment.author_id != current_user_id:
-        logger.warning(f"Unauthorized access attempt! User {current_user_id} tried to view comment {comment_id}")
+        logger.warning(
+            "get_comment_unauthorized",
+            comment_id=str(comment_id),
+            user_id=str(current_user_id),
+            author_id=str(comment.author_id)
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="you don't have permission to do this!"
         )
-        
+
+    logger.info(
+        "get_comment_success",
+        comment_id=str(comment_id),
+        user_id=str(current_user_id)
+    )
+
     return comment
 
 async def update_comment_service(  
