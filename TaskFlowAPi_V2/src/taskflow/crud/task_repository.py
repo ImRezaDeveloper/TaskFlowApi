@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.taskflow.models.tasks import Task
 from src.taskflow.schemas.contract.task_schema import TaskCreate, TaskUpdate
 import logging
+import time
 
 logger = logging.getLogger("taskflow.repository.tasks")
 
@@ -26,6 +27,8 @@ async def get_task_by_id_db(db: AsyncSession, task_id: UUID) -> Optional[Task]:
 
 
 async def get_board_tasks_db(db: AsyncSession, board_id: UUID, skip: int = 0, limit: int = 100) -> List[Task]:
+    start = time.perf_counter()
+
     query = (
         select(Task)
         .where(Task.board_id == board_id)
@@ -33,6 +36,7 @@ async def get_board_tasks_db(db: AsyncSession, board_id: UUID, skip: int = 0, li
         .limit(limit)
     )
     result = await db.execute(query)  
+    print(f"{time.perf_counter() - start:.6f} sec")
     return list(result.scalars().all())
 
 

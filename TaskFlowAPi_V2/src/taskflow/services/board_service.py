@@ -37,13 +37,13 @@ async def get_all_boards_service(db, current_user_id: UUID):
 
     logger.info(f"Found {len(boards)} board(s)")
 
-    return await boards
+    return boards
 
 
 async def get_board_by_id_service(db, board_id: UUID, current_user_id: UUID):
     logger.info(f"Fetching board {board_id} for user {current_user_id}")
 
-    board = await get_board_by_id_db(db, board_id)
+    board = await get_board_by_id_db(db, board_id, current_user_id)
 
     if board is None:
         logger.warning(f"Board {board_id} not found")
@@ -65,7 +65,7 @@ async def get_board_by_id_service(db, board_id: UUID, current_user_id: UUID):
 
     logger.info(f"Board {board_id} fetched successfully")
 
-    return await board
+    return board
 
 async def update_board_service(
     db,
@@ -99,13 +99,13 @@ async def update_board_service(
 
     logger.info(f"Board {board_id} updated successfully")
 
-    return await updated_board
+    return updated_board
 
 async def delete_board_service(db, board_id: UUID, current_user_id: UUID):
     
     logger.info(f"Deleting board {board_id} for user {current_user_id}")
 
-    board = await get_board_by_id_db(db, board_id)
+    board = await get_board_by_id_db(db, board_id, current_user_id)
 
     if board is None:
         logger.warning(f"Board {board_id} not found")
@@ -129,7 +129,7 @@ async def delete_board_service(db, board_id: UUID, current_user_id: UUID):
 
     logger.info(f"Board {board_id} deleted successfully")
 
-    return await delete_board
+    return delete_board
 
 async def create_task_service_board(
     db,
@@ -177,7 +177,7 @@ async def create_task_service_board(
         f"Task {created_task.id} created successfully in board {board.id}"
     )
 
-    return await created_task
+    return created_task
 
 async def get_tasks_by_board_id_service(
     db: AsyncSession,

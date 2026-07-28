@@ -14,7 +14,6 @@ from src.taskflow.services.board_service import (
     update_board_service,
     delete_board_service,
     get_tasks_by_board_id_service,
-    delete_task_by_id_in_board_db
 )
 
 from src.taskflow.db.database import get_db
@@ -40,7 +39,7 @@ async def get_board(
     return await get_board_by_id_service(db, board_id, current_user.id)  
 
 
-@router.get("/", response_model=list[BoardResponse], status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK)
 async def get_all_boards(  
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -76,10 +75,10 @@ async def delete_board(
     db: AsyncSession = Depends(get_db), 
     current_user: User = Depends(get_current_user)
 ):
-    return await delete_board_service(db, board_id, current_user)  
+    return await delete_board_service(db, board_id, current_user.id)  
+
 
 # board_tasks
-
 @router.post(
     "/{board_id}/tasks",
     response_model=TaskResponse,
@@ -119,7 +118,7 @@ async def delete_task_in_board(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return await delete_task_by_id_in_board_service(  
+    return await delete_board_service(  
         db, 
         board_id, 
         task_id, 
