@@ -15,8 +15,6 @@ from src.taskflow.crud.comment_repository import (
 )
 
 
-# logger = structlog.getLogger(__name__)
-
 async def create_comment_service(  
     db: AsyncSession,
     comment_create: CommentCreate,
@@ -26,11 +24,9 @@ async def create_comment_service(
 ):
     logger.info(
         "create_comment_started",
-        extra={
-            "user_id": str(current_user_id),
-            "task_id": str(task_id),
-            "board_id": str(board_id),
-        }
+        user_id=str(current_user_id),
+        task_id=str(task_id),
+        board_id=str(board_id)
     )
 
     try:
@@ -39,24 +35,21 @@ async def create_comment_service(
         )
         logger.info(
             "create_comment_completed",
-            extra={
-                "comment_id":str(new_comment.id),
-                "user_id":str(current_user_id),
-                "task_id":str(task_id)
-            }
+            comment_id=str(new_comment.id),
+            user_id=str(current_user_id),
+            task_id=str(task_id)
         )
 
         return new_comment
     except Exception as e:
         logger.error(
             "create_comment_failed",
-            extra={
-                "user_id": str(current_user_id),
-                "task_id": str(task_id),
-                "error": str(e),
-                "exc_info": True
-            }
+            user_id=str(current_user_id),
+            task_id=str(task_id),
+            error= str(e),
+            exc_info=True
         )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="there was an error in creating comment"
@@ -66,10 +59,8 @@ async def get_comment_by_id_service(db: AsyncSession, comment_id: UUID,current_u
 
     logger.info(
         "get_comment_started",
-        extra={
-            "comment_id": str(comment_id),
-            "user_id": str(current_user_id)
-        }
+        comment_id=str(comment_id),
+        user_id=str(current_user_id)
     )
     
     comment = await get_comment_by_id_db(db, comment_id)  
@@ -113,32 +104,62 @@ async def update_comment_service(
     update_data: CommentUpdate,
     current_user_id: UUID,
 ):
+
+    logger.info(
+        "update_comment_started",
+        comment_id=str(comment_id),
+        current_user_id=str(current_user_id)
+    )
+
     try:
         comment = await update_comment_db(  
             db, comment_id, update_data, current_user_id
         )
         
         if not comment:
-            logger.warning(f"Comment {comment_id} not found for update by user {current_user_id}")
+            logger.warning(
+                "update_comment_failed",
+                comment_id=str(comment_id),
+                current_user_id=str(current_user_id),
+                reason="comment_not_found"
+            )
+
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Comment not found"
             )
         
         if comment.author_id != current_user_id:
-            logger.warning(f"User {current_user_id} tried to update comment {comment_id} but is not the owner")
+            logger.warning(
+                "update_comment_failed",
+                current_user_id=str(current_user_id),
+                comment_id=str(comment_id),
+                reason="unauthorized"
+            )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You don't have permission to update this comment"
             )
         
         logger.info(f"Comment {comment_id} successfully updated by user {current_user_id}")
+        logger.info(
+            "update_comment",
+            comment_id=str(comment_id),
+            current_user_id=str(current_user_id),
+            reason="success"
+        )
+
         return comment
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to update comment {comment_id}: {str(e)}", exc_info=True)
+        logger.error(
+            "update_comment_failed",
+            comment_id=str(comment_id),
+            error=str(e),
+            exc_info=True
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="There was an error updating the comment"

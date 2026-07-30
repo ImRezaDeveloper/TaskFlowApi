@@ -9,6 +9,8 @@ from src.taskflow.api.v1.endpints.board_router import router as board_router
 from src.taskflow.api.v1.endpints.comment_router import router as comment_router
 from src.taskflow.core.loggin import setup_logging
 from src.taskflow.db.database import Base, engine
+from src.taskflow.core.middleware import RequestLoggingMiddleware
+
 
 setup_logging()
 
@@ -25,6 +27,8 @@ app = FastAPI(
     description="Production-ready team task management API",
     version="1.0.0"
 )
+
+app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(auth_router)
 app.include_router(user_router)

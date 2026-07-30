@@ -30,10 +30,10 @@ async def read_me(current_user = Depends(get_current_user)):
 @router.get("/{user_id}")
 async def get_user(
     user_id: UUID,
-    # current_user = Depends(get_current_user),
     get_db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
-    return await get_user_id(user_id, get_db)
+    return await get_user_id(user_id, get_db, current_user)
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def add_user(
