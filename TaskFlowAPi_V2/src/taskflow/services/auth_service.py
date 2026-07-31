@@ -11,10 +11,7 @@ from src.taskflow.db.database import get_db
 from psycopg2.extras import RealDictCursor
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.taskflow.core.loggin import setup_logging
-import logging
-
-setup_logging()
-logger = logging.getLogger(__name__)
+from src.taskflow.core.loggin import logger
 
 oauth = oauth_schemes
 
@@ -25,8 +22,8 @@ async def authenticate_user(
     db: AsyncSession = Depends(get_db)
 ):
     logger.info(
-        "Authentication started. email=%s",
-        email
+        "authenticate_user_started",
+        email=email
     )
 
     stmt = select(User).where(User.email == email)
@@ -35,8 +32,9 @@ async def authenticate_user(
 
     if user is None:
         logger.warning(
-            "Authentication failed. User not found. email=%s",
-            email
+            "authenticate_user_failed",
+            email=email,
+            reason="user_not_found"
         )
 
         raise HTTPException(
@@ -46,8 +44,10 @@ async def authenticate_user(
 
     if not verify_pwd(password, user.hashed_password):
         logger.warning(
-            "Authentication failed. Invalid password. user_id=%s",
-            user.id
+            "authenticate_user_failed",
+            user_id=str(user.id),
+            email=email,
+            reason="invalid_password"
         )
 
         raise HTTPException(
@@ -64,8 +64,9 @@ async def authenticate_user(
     )
 
     logger.info(
-        "Authentication succeeded. user_id=%s",
-        user.id
+        "authenticate_user_success",
+        user_id=str(user.id),
+        email=email
     )
 
     return {
@@ -81,6 +82,12 @@ async def get_current_user(
     token: str = Depends(oauth),
     db: AsyncSession = Depends(get_db)
 ):
+
+    logger.info(
+        "get_current_user_started",
+        token_preview=token[:10] + "..." if len(token) > 10 else token
+    )
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -95,6 +102,10 @@ async def get_current_user(
         )
         user_id = payload.get("sub")
         if user_id is None:
+            logger.warning(
+                "get_current_user_failed",
+                reason="missing_user_id_in_token"
+            )
             raise credentials_exception
     except JWTError:
         raise credentials_exception
@@ -103,6 +114,17 @@ async def get_current_user(
     user = result.scalar_one_or_none()
     
     if user is None:
+        logger.warning(
+            "get_current_user_failed",
+            user_id=user_id,
+            reason="user_not_found_in_db"
+        )
         raise credentials_exception
+
+    logger.info(
+        "get_current_user_success",
+        user_id=str(user.id),
+        email=user.email
+    )
 
     return user
