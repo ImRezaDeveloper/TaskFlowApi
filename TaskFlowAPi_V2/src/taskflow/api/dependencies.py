@@ -1,5 +1,5 @@
 from typing import Generator
-from taskflow.src.taskflow.db.database import db_pool
+from src.taskflow.db.database import db_pool
 
 def get_db() -> Generator:
     connection = None

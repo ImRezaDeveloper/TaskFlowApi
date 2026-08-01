@@ -57,6 +57,14 @@ async def get_task_by_id_in_board_db(db: AsyncSession, board_id: UUID):
     result = await db.execute(stmt)  
     return result.scalars().all()
 
+async def get_task_by_id_in_board_db(
+    db: AsyncSession,
+    board_id: UUID,
+    task_id: UUID
+):
+    stmt = select(Task).where(Task.board_id == board_id , Task.id == task_id)
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
 
 async def delete_task_by_id_in_board_db(
     db: AsyncSession,

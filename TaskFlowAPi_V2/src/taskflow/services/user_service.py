@@ -1,6 +1,5 @@
 from uuid import UUID
-from fastapi import Depends, FastAPI, HTTPException
-from starlette import status
+from src.taskflow.exceptions.user import UserNotFoundError
 from src.taskflow.core.loggin import logger
 from src.taskflow.core.security import hash_pwd
 from src.taskflow.crud.user_repository import get_user_by_id as get_user_id
@@ -28,10 +27,7 @@ async def get_user_by_id(user_id: UUID, db: AsyncSession, current_user_id) -> Us
             "get_user_by_id_failed",
             reason="user_not_found"
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise UserNotFoundError(user_id)
 
     logger.info(
         "get_user_by_id",
@@ -86,7 +82,7 @@ async def create_user(
             email=email,
             error=str(e)
         )
-        raise
+        raise 
 
 async def update_user(
     user_id: UUID,
@@ -107,10 +103,7 @@ async def update_user(
             user_id=str(user_id),
             reason="user_not_found"
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise UserNotFoundError(user_id)
 
     updated_user = await update_user_db(db, user, user_data)
 
@@ -139,10 +132,7 @@ async def delete_user(
             user_id=str(user_id),
             reason="user_not_found"
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise UserNotFoundError(user_id)
 
     deleted_user = await delete_user_db(db, user_id)
 

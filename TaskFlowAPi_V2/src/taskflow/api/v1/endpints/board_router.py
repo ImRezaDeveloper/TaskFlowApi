@@ -9,6 +9,7 @@ from src.taskflow.schemas.contract.task_schema import TaskCreate, TaskResponse
 from src.taskflow.services.board_service import (
     create_board_service,
     create_task_service_board,
+    delete_task_by_id_board_service,
     get_all_boards_service,
     get_board_by_id_service,
     update_board_service,
@@ -118,7 +119,7 @@ async def delete_task_in_board(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return await delete_board_service(  
+    return await delete_task_by_id_board_service(  
         db, 
         board_id, 
         task_id, 

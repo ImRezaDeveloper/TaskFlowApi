@@ -1,6 +1,6 @@
 from uuid import UUID
-from fastapi import HTTPException, status
 from sqlalchemy import select
+from src.taskflow.exceptions.task import TaskNotFoundError
 from src.taskflow.crud.task_repository import delete_task_db
 from src.taskflow.models.boards import Board
 from src.taskflow.crud.board_repository import create_task_db, delete_task_by_id_in_board_db, get_task_by_id_in_board_db, update_board_db, delete_board_db, create_board_db, get_all_boards_db, get_board_by_id_db
@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.taskflow.models.tasks import Task
 from src.taskflow.core.loggin import logger
 from src.taskflow.schemas.contract.board_schema import BoardUpdate
-from src.taskflow.schemas.contract.task_schema import TaskCreate
+from src.taskflow.exceptions.board import BoardNotFoundError, BoardPermissionDenied
 
 async def create_board_service(db, board_data, current_user_id: UUID):
     # logger.info(
@@ -69,10 +69,7 @@ async def get_board_by_id_service(db, board_id: UUID, current_user_id: UUID):
             reason="board_not_found"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Board not found"
-        )
+        raise BoardNotFoundError(board_id)
 
     if board.owner_id != current_user_id:
         logger.warning(
@@ -82,10 +79,8 @@ async def get_board_by_id_service(db, board_id: UUID, current_user_id: UUID):
             reason="unauthorized access"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
+        owner_id = board.owner_id
+        raise BoardPermissionDenied(owner_id)
 
     logger.info(
         "get_board_by_id",
@@ -118,10 +113,7 @@ async def update_board_service(
             reason="board_not_found"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Board not found"
-        )
+        raise BoardNotFoundError(board_id)
 
     if board.owner_id != current_user_id:
         logger.warning(
@@ -132,10 +124,8 @@ async def update_board_service(
             reason="unauthorized_update_attempt"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
+        owner_id = board.owner_id
+        raise BoardPermissionDenied(owner_id)
 
     logger.debug(
         "Update data for board %s: %s",
@@ -162,7 +152,7 @@ async def update_board_service(
 async def delete_board_service(
     db: AsyncSession,
     board_id: UUID,
-    current_user_id: UUID,
+    current_user_id: UUID
 ):
     logger.info(
         "delete_board_by_id_started",
@@ -180,10 +170,7 @@ async def delete_board_service(
             reason="board_not_found"
         )
         
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Board not found"
-        )
+        raise BoardNotFoundError(board_id)
 
     if board.owner_id != current_user_id:
         logger.warning(
@@ -193,10 +180,9 @@ async def delete_board_service(
             board_owner_id=str(board.owner_id),
             reason="unauthorized_delete_attempt"
         )
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
+
+        owner_id = board.owner_id
+        raise BoardPermissionDenied(owner_id)
 
     deleted_board = await delete_board_db(db, board)
 
@@ -233,10 +219,7 @@ async def create_task_service_board(
             reason="board_not_found"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Board not found"
-        )
+        raise BoardNotFoundError(board_id)
 
     if board.owner_id != current_user_id:
         logger.warning(
@@ -247,10 +230,8 @@ async def create_task_service_board(
             reason="unauthorized"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
+        owner_id = board.owner_id
+        raise BoardPermissionDenied(owner_id)
 
     task = Task(
         title=task_data.title,
@@ -295,10 +276,7 @@ async def get_tasks_by_board_id_service(
             reason="board_not_found"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Board not found"
-        )
+        raise BoardNotFoundError(board_id)
 
     if board.owner_id != current_user_id:
         logger.warning(
@@ -309,10 +287,8 @@ async def get_tasks_by_board_id_service(
             reason="unauthorized"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
+        owner_id = board.owner_id
+        raise BoardPermissionDenied(owner_id)
 
     tasks = await get_task_by_id_in_board_db(db, board_id)
 
@@ -349,10 +325,7 @@ async def delete_task_by_id_board_service(
             reason="board_not_found"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Board not found"
-        )
+        raise BoardNotFoundError(board_id)
 
     if board.owner_id != current_user_id:
         logger.warning(
@@ -364,10 +337,8 @@ async def delete_task_by_id_board_service(
             reason="unauthorized"
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
+        owner_id = board.owner_id
+        raise BoardPermissionDenied(owner_id)
 
     task = await get_task_by_id_in_board_db(db, board_id, task_id)
 
@@ -379,12 +350,10 @@ async def delete_task_by_id_board_service(
             task_id=str(task_id),
             reason="task_not_found"
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not found"
-        )
 
-    await delete_task_db(db, task.id)
+        raise TaskNotFoundError(task_id)
+
+    await delete_task_by_id_in_board_db(db, board_id, task_id, current_user_id)
 
     logger.info(
         "delete_task_in_board_success",
