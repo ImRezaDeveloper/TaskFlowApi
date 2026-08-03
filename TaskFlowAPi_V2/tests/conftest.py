@@ -1,18 +1,14 @@
 # tests/conftest.py
-from httpx import AsyncClient, ASGITransport
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import sessionmaker
-from src.taskflow.main import app
-from src.taskflow.db.database import Base, get_db
-from src.taskflow.core.config import settings
-from tests.fixture.auth_headers import auth_headers
-
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
     AsyncSession,
     async_sessionmaker,
+    create_async_engine,
 )
+
+from src.taskflow.db.database import get_db
+from src.taskflow.main import app
 
 TEST_DATABASE_URL = "postgresql+asyncpg://postgres:rezapapi1384@localhost:5433/test_db"
 
@@ -51,6 +47,7 @@ TestingSessionLocal = async_sessionmaker(
 
 #     Base.metadata.drop_all(bind=engine)
 
+
 @pytest.fixture(scope="function")
 def client():
     async def override_get_db():
@@ -64,6 +61,7 @@ def client():
 
     app.dependency_overrides.clear()
 
+
 # @pytest.fixture
 # def test_db_session(test_engine):
 #     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
@@ -71,6 +69,7 @@ def client():
 #     yield session
 #     session.rollback()
 #     session.close()
+
 
 @pytest.fixture
 def sample_board(client, auth_headers):
@@ -80,16 +79,15 @@ def sample_board(client, auth_headers):
     }
     response = client.post("/boards/", json=board_data, headers=auth_headers)
     assert response.status_code == 201, f"Board creation failed: {response.json()}"
-    board_id = response.json()['id']
-    return {
-        "board_id": board_id
-    }
+    board_id = response.json()["id"]
+    return {"board_id": board_id}
+
 
 @pytest.fixture
 def sample_task(client, auth_headers, sample_board):
 
-    user_id = auth_headers['user_id']
-    board_id = sample_board['board_id']
+    user_id = auth_headers["user_id"]
+    board_id = sample_board["board_id"]
 
     task_data = {
         "title": "chest program",
@@ -98,39 +96,41 @@ def sample_task(client, auth_headers, sample_board):
         "priority": "high",
         "due_date": "2026-07-10 14:47:03.397",
         "user_id": user_id,
-        "board_id": board_id
+        "board_id": board_id,
     }
 
     response = client.post("/tasks/", json=task_data, headers=auth_headers)
     assert response.status_code == 201, f"Task creation failed: {response.json()}"
-    task_id = response.json()['id']
-    return {
-        "task_id": task_id
-    }
+    task_id = response.json()["id"]
+    return {"task_id": task_id}
+
 
 @pytest.fixture
 def create_comment(client, auth_headers, sample_board, sample_task):
 
-    board_id = sample_board['board_id']
-    task_id = sample_task['task_id']
+    board_id = sample_board["board_id"]
+    task_id = sample_task["task_id"]
 
     comment_data = {
-            "content": "oh, i love this program, it gave me the heavy weight",
+        "content": "oh, i love this program, it gave me the heavy weight",
     }
-        
-    new_commment = client.post('/comments/', json=comment_data, headers=auth_headers, params={
-        "task_id": f'{task_id}',
-        "board_id": f'{board_id}'
-    })
-        
+
+    new_commment = client.post(
+        "/comments/",
+        json=comment_data,
+        headers=auth_headers,
+        params={"task_id": f"{task_id}", "board_id": f"{board_id}"},
+    )
+
     print("Status Code:", new_commment.status_code)
     print("Response JSON:", new_commment.json())
-        
-    comment_id = new_commment.json()['id']
-        
-    assert new_commment.status_code == 201
-    assert new_commment.json()["content"] == "oh, i love this program, it gave me the heavy weight"
 
-    return {
-        'comment_id': comment_id
-    }
+    comment_id = new_commment.json()["id"]
+
+    assert new_commment.status_code == 201
+    assert (
+        new_commment.json()["content"]
+        == "oh, i love this program, it gave me the heavy weight"
+    )
+
+    return {"comment_id": comment_id}

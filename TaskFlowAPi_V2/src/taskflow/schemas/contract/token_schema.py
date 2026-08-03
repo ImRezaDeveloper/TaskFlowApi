@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel
 
 
@@ -7,9 +6,11 @@ class Token(BaseModel):
     refresh_token: str
     token_type: str
 
+
 # Optional Field
 class TokenData(BaseModel):
-    user_id: Optional[int] = None
-    
+    user_id: int | None = None
+
+
 class RefreshRequest(BaseModel):
     refresh_token: str

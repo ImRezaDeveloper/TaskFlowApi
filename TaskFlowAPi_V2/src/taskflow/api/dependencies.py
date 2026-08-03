@@ -1,5 +1,7 @@
-from typing import Generator
+from collections.abc import Generator
+
 from src.taskflow.db.database import db_pool
+
 
 def get_db() -> Generator:
     connection = None
@@ -11,4 +13,3 @@ def get_db() -> Generator:
         if connection:
             # ALWAYS put the connection back into the pool when the request ends
             db_pool.putconn(connection)
-            

@@ -1,7 +1,6 @@
-from uuid import uuid4, UUID
 from fastapi.testclient import TestClient
+
 from src.taskflow.main import app
-from tests.fixture.auth_headers import auth_headers
 
 client = TestClient(app)
 
@@ -23,11 +22,11 @@ client = TestClient(app)
 
 #     print("Status Code:", create_response.status_code)
 #     print("Response JSON:", create_response.json())
-    
+
 #     board_id = create_response.json()['id']
-    
+
 #     assert create_response.status_code == 201
-    
+
 #     task_data = {
 #         "title": "learn english",
 #         "description": "learnig english with tifani",
@@ -46,9 +45,9 @@ client = TestClient(app)
 
 #     print("Status Code:", response.status_code)
 #     print("Response JSON:", response.json())
-    
+
 #     assert response.status_code == 201
-    
+
 # successfull test!
 # def test_get_task_success(client, auth_headers):
 #     user_id = auth_headers["user_id"]
@@ -67,11 +66,11 @@ client = TestClient(app)
 
 #     print("Status Code:", create_response.status_code)
 #     print("Response JSON:", create_response.json())
-    
+
 #     board_id = create_response.json()['id']
-    
+
 #     assert create_response.status_code == 201
-    
+
 #     # task
 #     task_data = {
 #         "title": "learn english",
@@ -91,24 +90,24 @@ client = TestClient(app)
 
 #     print("Status Code:", response.status_code)
 #     print("Response JSON:", response.json())
-    
+
 #     assert response.status_code == 201
-    
+
 #     # assert
 #     task_id = response.json()['id']
-    
+
 #     task = client.get(f'/tasks/{task_id}', headers=auth_headers)
-    
+
 #     assert task.status_code == 200
 #     print(task.status_code)
 #     print(task.json())
 #     assert task.json()["id"] == task_id
 #     assert response.json()["title"] == "learn english"
-    
+
 # successfull test!
 # def test_update_task_success(client, auth_headers):
 #     user_id = auth_headers["user_id"]
-    
+
 #     # board
 #     board_data = {
 #         "name": "daily english",
@@ -123,11 +122,11 @@ client = TestClient(app)
 
 #     print("Status Code:", create_response.status_code)
 #     print("Response JSON:", create_response.json())
-    
+
 #     board_id = create_response.json()['id']
-    
+
 #     assert create_response.status_code == 201
-    
+
 #     # task
 #     task_data = {
 #         "title": "learn english",
@@ -147,30 +146,30 @@ client = TestClient(app)
 
 #     print("Status Code:", response.status_code)
 #     print("Response JSON:", response.json())
-    
+
 #     assert response.status_code == 201
-    
+
 #     # assert
 #     task_id = response.json()['id']
-    
+
 #     update_task = {
 #         "title": "learn english with me",
 #         "description": "updated description"
 #     }
-    
+
 #     task = client.patch(f'/tasks/{task_id}', headers=auth_headers, json=update_task)
-    
+
 #     assert task.status_code == 200
 #     print(task.status_code)
 #     print(task.json())
 #     assert task.json()["id"] == task_id
 #     assert task.json()["title"] == "learn english with me"
-    
+
 # successfull test ****
 # def test_delete_task_success(client, auth_headers):
-    
+
 #     user_id = auth_headers["user_id"]
-    
+
 #     # board
 #     board_data = {
 #         "name": "daily english",
@@ -185,11 +184,11 @@ client = TestClient(app)
 
 #     print("Status Code:", create_response.status_code)
 #     print("Response JSON:", create_response.json())
-    
+
 #     board_id = create_response.json()['id']
-    
+
 #     assert create_response.status_code == 201
-    
+
 #     # task
 #     task_data = {
 #         "title": "learn english",
@@ -209,21 +208,21 @@ client = TestClient(app)
 
 #     print("Status Code:", response.status_code)
 #     print("Response JSON:", response.json())
-    
+
 #     assert response.status_code == 201
-    
+
 #     # assert
 #     task_id = response.json()['id']
-    
+
 #     task = client.delete(f'/tasks/{task_id}', headers=auth_headers)
-    
+
 #     assert task.status_code == 204
 #     print(task.status_code)
-    
+
 #     get_response = client.get(f'/tasks/{task_id}', headers=auth_headers)
 #     print("GET Status Code:", get_response.status_code)
 #     # print("GET Response JSON:", get_response.json())
-    
+
 #     # The task should not exist → 404 Not Found
 #     assert get_response.status_code == 404
 #     assert get_response.json()["detail"] == "your current task not found!"

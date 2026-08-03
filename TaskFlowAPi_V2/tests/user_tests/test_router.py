@@ -1,8 +1,6 @@
-from uuid import uuid4, UUID
 from fastapi.testclient import TestClient
-from httpx2 import AsyncClient, ASGITransport
+
 from src.taskflow.main import app
-import pytest
 
 client = TestClient(app)
 
@@ -25,7 +23,7 @@ client = TestClient(app)
 
 #     print("Status Code:", response.status_code)
 #     print("Response JSON:", response.json())
-    
+
 #     assert response.status_code == 201
 
 # successfull test!
@@ -66,13 +64,13 @@ client = TestClient(app)
 #     create_response = client.post("/users/", json=user_data)
 #     assert create_response.status_code == 201
 #     user_id = create_response.json()["id"]
-    
+
 #     user_update = {
 #         "username": "nima",
 #         "password": "nima123Strong@password"
 #     }
 #     update_response = client.put(f"/users/{user_id}", json=user_update)
-    
+
 #     assert update_response.status_code == 200
 #     updated_user = update_response.json()
 #     assert updated_user["id"] == user_id
@@ -80,7 +78,7 @@ client = TestClient(app)
 
 # successfull test!
 # def test_delete_user_success(client):
-    
+
 #     # arrange
 #     user_data = {
 #         "username": "farshad",
@@ -95,17 +93,17 @@ client = TestClient(app)
 #         "/users/",
 #         json=user_data
 #     )
-    
+
 #     print(create_response.json())
-    
+
 #     assert create_response.status_code == 201
 
 #     user_id = create_response.json()["id"]
-    
+
 #     # act
 #     response = client.delete(f'/users/{user_id}')
 #     assert response.status_code == 204
-    
+
 #     get_response = client.get(f'/users/{user_id}')
 #     assert get_response.status_code == 404
 #     assert get_response.json()["detail"] == "User not found"

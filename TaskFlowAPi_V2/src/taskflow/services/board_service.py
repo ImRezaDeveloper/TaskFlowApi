@@ -1,14 +1,25 @@
 from uuid import UUID
-from sqlalchemy import select
-from src.taskflow.exceptions.task import TaskNotFoundError
-from src.taskflow.crud.task_repository import delete_task_db
-from src.taskflow.models.boards import Board
-from src.taskflow.crud.board_repository import create_task_db, delete_task_by_id_in_board_db, get_task_by_id_in_board_db, update_board_db, delete_board_db, create_board_db, get_all_boards_db, get_board_by_id_db
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.taskflow.models.tasks import Task
+
 from src.taskflow.core.loggin import logger
-from src.taskflow.schemas.contract.board_schema import BoardUpdate
+from src.taskflow.crud.board_repository import (
+    create_board_db,
+    create_task_db,
+    delete_board_db,
+    delete_task_by_id_in_board_db,
+    get_all_boards_db,
+    get_all_tasks_by_id_in_board_db,
+    get_board_by_id_db,
+    get_task_by_id_in_board_db,
+    update_board_db,
+)
 from src.taskflow.exceptions.board import BoardNotFoundError, BoardPermissionDenied
+from src.taskflow.exceptions.task import TaskNotFoundError, TasksOfBoardsNotFound
+from src.taskflow.models.boards import Board
+from src.taskflow.models.tasks import Task
+from src.taskflow.schemas.contract.board_schema import BoardUpdate
+
 
 async def create_board_service(db, board_data, current_user_id: UUID):
     # logger.info(
@@ -16,15 +27,12 @@ async def create_board_service(db, board_data, current_user_id: UUID):
     #     board_data.name,
     #     current_user_id
     # )
-    logger.info(
-        "create_board_started",
-        board_name=str(board_data.name)
-    )
+    logger.info("create_board_started", board_name=str(board_data.name))
 
     board = Board(
         name=board_data.name,
         description=board_data.description,
-        owner_id=current_user_id
+        owner_id=current_user_id,
     )
 
     created_board = await create_board_db(db, board)
@@ -38,17 +46,11 @@ async def create_board_service(db, board_data, current_user_id: UUID):
 
 
 async def get_all_boards_service(db, current_user_id: UUID):
-    logger.info(
-        "get_all_boards_started",
-        current_user_id=str(current_user_id)
-    )
+    logger.info("get_all_boards_started", current_user_id=str(current_user_id))
 
     boards = await get_all_boards_db(db, current_user_id)
 
-    logger.info(
-        "get_all_boards",
-        current_user_id=str(current_user_id)
-    )
+    logger.info("get_all_boards", current_user_id=str(current_user_id))
 
     return boards
 
@@ -57,16 +59,14 @@ async def get_board_by_id_service(db, board_id: UUID, current_user_id: UUID):
     logger.info(
         "get_board_by_id_started",
         board_id=str(board_id),
-        current_user_id=str(current_user_id)
+        current_user_id=str(current_user_id),
     )
 
     board = await get_board_by_id_db(db, board_id, current_user_id)
 
     if board is None:
         logger.warning(
-            "get_board_by_id_failed",
-            board_id=str(board_id),
-            reason="board_not_found"
+            "get_board_by_id_failed", board_id=str(board_id), reason="board_not_found"
         )
 
         raise BoardNotFoundError(board_id)
@@ -76,19 +76,16 @@ async def get_board_by_id_service(db, board_id: UUID, current_user_id: UUID):
             "get_board_by_id_failed",
             board_owner_id=str(board.owner_id),
             current_user_id=str(current_user_id),
-            reason="unauthorized access"
+            reason="unauthorized access",
         )
 
         owner_id = board.owner_id
         raise BoardPermissionDenied(owner_id)
 
-    logger.info(
-        "get_board_by_id",
-        board_id=str(board_id),
-        action="success"
-    )
+    logger.info("get_board_by_id", board_id=str(board_id), action="success")
 
     return board
+
 
 async def update_board_service(
     db: AsyncSession,
@@ -100,7 +97,7 @@ async def update_board_service(
         "update_board",
         board_id=str(board_id),
         board_data=list(board_data.model_dump(exclude_unset=True).keys()),
-        current_user_id=str(current_user_id)
+        current_user_id=str(current_user_id),
     )
 
     board = await get_board_by_id_db(db, board_id, current_user_id)
@@ -110,7 +107,7 @@ async def update_board_service(
             "update_board_failed",
             board_id=str(board_id),
             current_user_id=str(current_user_id),
-            reason="board_not_found"
+            reason="board_not_found",
         )
 
         raise BoardNotFoundError(board_id)
@@ -121,7 +118,7 @@ async def update_board_service(
             board_id=str(board_id),
             current_user_id=str(current_user_id),
             board_owner_id=str(board.owner_id),
-            reason="unauthorized_update_attempt"
+            reason="unauthorized_update_attempt",
         )
 
         owner_id = board.owner_id
@@ -130,12 +127,12 @@ async def update_board_service(
     logger.debug(
         "Update data for board %s: %s",
         board_id,
-        board_data.model_dump(exclude_unset=True)
+        board_data.model_dump(exclude_unset=True),
     )
     logger.debug(
         "update_data_for_specific_board",
         board_id=str(board_id),
-        board_data=list(board_data.model_dump(exclude_unset=True).keys())
+        board_data=list(board_data.model_dump(exclude_unset=True).keys()),
     )
 
     updated_board = await update_board_db(db, board, board_data)
@@ -144,22 +141,19 @@ async def update_board_service(
         "update_board",
         board_id=str(board_id),
         current_user_id=str(current_user_id),
-        action="success"
+        action="success",
     )
 
     return updated_board
 
-async def delete_board_service(
-    db: AsyncSession,
-    board_id: UUID,
-    current_user_id: UUID
-):
+
+async def delete_board_service(db: AsyncSession, board_id: UUID, current_user_id: UUID):
     logger.info(
         "delete_board_by_id_started",
         board_id=str(board_id),
-        current_user_id=str(current_user_id)
+        current_user_id=str(current_user_id),
     )
-    
+
     board = await get_board_by_id_db(db, board_id, current_user_id)
 
     if board is None:
@@ -167,9 +161,9 @@ async def delete_board_service(
             "delete_board_failed",
             board_id=str(board_id),
             current_user_id=str(current_user_id),
-            reason="board_not_found"
+            reason="board_not_found",
         )
-        
+
         raise BoardNotFoundError(board_id)
 
     if board.owner_id != current_user_id:
@@ -178,7 +172,7 @@ async def delete_board_service(
             board_id=str(board_id),
             current_user_id=str(current_user_id),
             board_owner_id=str(board.owner_id),
-            reason="unauthorized_delete_attempt"
+            reason="unauthorized_delete_attempt",
         )
 
         owner_id = board.owner_id
@@ -190,10 +184,11 @@ async def delete_board_service(
         "delete_board",
         board_id=str(board_id),
         current_user_id=str(current_user_id),
-        action='success'
+        action="success",
     )
 
     return deleted_board
+
 
 async def create_task_service_board(
     db,
@@ -205,9 +200,8 @@ async def create_task_service_board(
         "create_task_in_board_started",
         user_id=str(current_user_id),
         board_id=str(board_id),
-        title=task_data.title
+        title=task_data.title,
     )
-
 
     board = await get_board_by_id_db(db, board_id, current_user_id)
 
@@ -216,7 +210,7 @@ async def create_task_service_board(
             "create_task_in_board_failed",
             user_id=str(current_user_id),
             board_id=str(board_id),
-            reason="board_not_found"
+            reason="board_not_found",
         )
 
         raise BoardNotFoundError(board_id)
@@ -227,7 +221,7 @@ async def create_task_service_board(
             user_id=str(current_user_id),
             board_id=str(board_id),
             board_owner_id=str(board.owner_id),
-            reason="unauthorized"
+            reason="unauthorized",
         )
 
         owner_id = board.owner_id
@@ -250,56 +244,79 @@ async def create_task_service_board(
         task_id=str(created_task.id),
         board_id=str(board_id),
         user_id=str(current_user_id),
-        title=task_data.title
+        title=task_data.title,
     )
 
     return created_task
 
+
 async def get_tasks_by_board_id_service(
     db: AsyncSession,
     board_id: UUID,
+    task_id: UUID,
     current_user_id: UUID,
 ):
     logger.info(
         "get_tasks_in_board_started",
         user_id=str(current_user_id),
-        board_id=str(board_id)
-    )
-
-    board = await get_board_by_id_db(db, board_id, current_user_id)
-
-    if board is None:
-        logger.warning(
-            "get_tasks_in_board_failed",
-            user_id=str(current_user_id),
-            board_id=str(board_id),
-            reason="board_not_found"
-        )
-
-        raise BoardNotFoundError(board_id)
-
-    if board.owner_id != current_user_id:
-        logger.warning(
-            "get_tasks_in_board_failed",
-            user_id=str(current_user_id),
-            board_id=str(board_id),
-            board_owner_id=str(board.owner_id),
-            reason="unauthorized"
-        )
-
-        owner_id = board.owner_id
-        raise BoardPermissionDenied(owner_id)
-
-    tasks = await get_task_by_id_in_board_db(db, board_id)
-
-    logger.info(
-        "get_tasks_in_board_success",
-        user_id=str(current_user_id),
         board_id=str(board_id),
-        task_count=len(tasks)
+        task_id=str(task_id)
     )
 
-    return tasks
+    try:
+        board = await get_board_by_id_db(db, board_id, current_user_id)
+
+        if board is None:
+            logger.warning(
+                "get_tasks_in_board_failed",
+                user_id=str(current_user_id),
+                board_id=str(board_id),
+                task_id=str(task_id),
+                reason="board_not_found",
+            )
+
+            raise BoardNotFoundError(board_id)
+
+        if board.owner_id != current_user_id:
+            logger.warning(
+                "get_tasks_in_board_failed",
+                user_id=str(current_user_id),
+                board_id=str(board_id),
+                board_owner_id=str(board.owner_id),
+                reason="unauthorized",
+            )
+
+            owner_id = board.owner_id
+            raise BoardPermissionDenied(owner_id)
+
+        tasks = await get_all_tasks_by_id_in_board_db(db, board_id)
+        print(tasks)
+
+        if not tasks:
+            logger.warning(
+                "get_tasks_in_board_failed",
+                user_id=str(current_user_id),
+                board_id=str(board_id),
+                task_id=str(task_id),
+                board_owner_id=str(board.owner_id),
+                reason="unauthorized",
+            )
+
+            raise TasksOfBoardsNotFound(board_id, str(e))
+        
+        logger.info(
+            "get_tasks_in_board_success",
+            user_id=str(current_user_id),
+            board_id=str(board_id),
+            task_count=len(tasks),
+        )
+
+        return tasks
+    except (TaskNotFoundError, TasksOfBoardsNotFound, BoardNotFoundError, BoardPermissionDenied):
+        raise
+    except Exception as e:
+        logger.error()
+
 
 async def delete_task_by_id_board_service(
     db: AsyncSession,
@@ -311,7 +328,7 @@ async def delete_task_by_id_board_service(
         "delete_task_in_board_started",
         user_id=str(current_user_id),
         board_id=str(board_id),
-        task_id=str(task_id)
+        task_id=str(task_id),
     )
 
     board = await get_board_by_id_db(db, board_id, current_user_id)
@@ -322,7 +339,7 @@ async def delete_task_by_id_board_service(
             user_id=str(current_user_id),
             board_id=str(board_id),
             task_id=str(task_id),
-            reason="board_not_found"
+            reason="board_not_found",
         )
 
         raise BoardNotFoundError(board_id)
@@ -334,7 +351,7 @@ async def delete_task_by_id_board_service(
             board_id=str(board_id),
             task_id=str(task_id),
             board_owner_id=str(board.owner_id),
-            reason="unauthorized"
+            reason="unauthorized",
         )
 
         owner_id = board.owner_id
@@ -348,7 +365,7 @@ async def delete_task_by_id_board_service(
             user_id=str(current_user_id),
             board_id=str(board_id),
             task_id=str(task_id),
-            reason="task_not_found"
+            reason="task_not_found",
         )
 
         raise TaskNotFoundError(task_id)
@@ -359,9 +376,7 @@ async def delete_task_by_id_board_service(
         "delete_task_in_board_success",
         user_id=str(current_user_id),
         board_id=str(board_id),
-        task_id=str(task_id)
+        task_id=str(task_id),
     )
 
-    return {
-        "message": "Task deleted successfully"
-    }
+    return {"message": "Task deleted successfully"}

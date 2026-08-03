@@ -1,11 +1,12 @@
 from datetime import datetime
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
 
 
 class CommentBase(BaseModel):
     content: str
-    
+
 
 class CommentCreate(CommentBase):
     pass
