@@ -205,7 +205,7 @@ async def delete_comment_service(
                 author_id=str(comment.author_id),
                 reason="permission_denied",
             )
-            raise CommentPermissionDenied(comment_id)
+            raise CommentPermissionDenied(comment.author_id)
 
         result = await delete_comment_db(db, comment_id)
 

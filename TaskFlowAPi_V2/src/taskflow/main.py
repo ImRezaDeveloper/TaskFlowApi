@@ -11,6 +11,7 @@ from src.taskflow.api.v1.endpints.user_router import router as user_router
 from src.taskflow.core.loggin import setup_logging
 from src.taskflow.core.middleware import RequestLoggingMiddleware
 from src.taskflow.db.database import Base, engine
+from src.taskflow.exceptions.handlers import register_exception_handlers
 
 setup_logging()
 
@@ -29,6 +30,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
+register_exception_handlers(app)
 app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(auth_router)

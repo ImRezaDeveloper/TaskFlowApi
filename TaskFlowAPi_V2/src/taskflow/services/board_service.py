@@ -11,10 +11,12 @@ from src.taskflow.crud.board_repository import (
     get_all_boards_db,
     get_all_tasks_by_id_in_board_db,
     get_board_by_id_db,
+    get_board_by_name_db,
     get_task_by_id_in_board_db,
     update_board_db,
 )
-from src.taskflow.exceptions.board import BoardNotFoundError, BoardPermissionDenied
+from src.taskflow.exceptions.board import BoardNotFoundError, BoardPermissionDenied, BoardCreationError, BoardAlreadyExistError
+from src.taskflow.exceptions.user import UserMustBeLoggedIn
 from src.taskflow.exceptions.task import TaskNotFoundError, TasksOfBoardsNotFound
 from src.taskflow.models.boards import Board
 from src.taskflow.models.tasks import Task
@@ -22,28 +24,41 @@ from src.taskflow.schemas.contract.board_schema import BoardUpdate
 
 
 async def create_board_service(db, board_data, current_user_id: UUID):
-    # logger.info(
-    #     "Creating board '%s' for user_id=%s",
-    #     board_data.name,
-    #     current_user_id
-    # )
     logger.info("create_board_started", board_name=str(board_data.name))
 
-    board = Board(
-        name=board_data.name,
-        description=board_data.description,
-        owner_id=current_user_id,
-    )
+    try:
+        if not current_user_id:
+            raise UserMustBeLoggedIn(current_user_id)
 
-    created_board = await create_board_db(db, board)
+        board = Board(
+            name=board_data.name,
+            description=board_data.description,
+            owner_id=current_user_id,
+        )
 
-    logger.info(
-        "create_board",
-        board_id=created_board.id,
-    )
+        existing_board = await get_board_by_name_db(db, board.name, current_user_id)
 
-    return created_board
+        if existing_board:
+            raise BoardAlreadyExistError(board.name, current_user_id)
+        
+        created_board = await create_board_db(db, board)
 
+        logger.info(
+            "create_board",
+            board_id=created_board.id,
+        )
+
+        return created_board
+    except (BoardCreationError, BoardAlreadyExistError):
+        raise
+    except Exception as e:
+        logger.error(
+            "create_board_error",
+            user_id=str(current_user_id),
+            error=str(e),
+            exc_info=True,
+        )
+        raise BoardCreationError(str(e))
 
 async def get_all_boards_service(db, current_user_id: UUID):
     logger.info("get_all_boards_started", current_user_id=str(current_user_id))
@@ -314,7 +329,7 @@ async def get_tasks_by_board_id_service(
         return tasks
     except (TaskNotFoundError, TasksOfBoardsNotFound, BoardNotFoundError, BoardPermissionDenied):
         raise
-    except Exception as e:
+    except Exception:
         logger.error()
 
 

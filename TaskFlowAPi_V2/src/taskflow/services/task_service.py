@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.taskflow.core.loggin import logger
