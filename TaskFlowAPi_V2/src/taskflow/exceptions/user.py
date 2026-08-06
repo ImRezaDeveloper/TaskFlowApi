@@ -31,9 +31,10 @@ class UserCreationError(TaskFlowException):
         self.message = f"Failed to create user {username} ({email}): {reason}"
         super().__init__(self.message)
 
+
 class UserMustBeLoggedIn(TaskFlowException):
     def __init__(self, current_user_id: UUID, reason: str):
         self.user_id = current_user_id
         self.reason = reason
-        self.message = f"You must be logged in to create a board"
+        self.message = "You must be logged in to create a board"
         super().__init__(self.message)

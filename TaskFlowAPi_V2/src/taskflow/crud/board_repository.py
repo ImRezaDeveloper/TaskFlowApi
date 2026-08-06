@@ -26,6 +26,7 @@ async def get_board_by_id_db(db: AsyncSession, board_id: UUID, current_user_id: 
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
+
 async def get_board_by_name_db(db: AsyncSession, name: str, current_user_id: UUID):
     stmt = select(Board).where(Board.name == name)
     result = await db.execute(stmt)

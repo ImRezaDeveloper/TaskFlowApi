@@ -43,6 +43,7 @@ class TaskUpdateError(TaskFlowException):
         self.message = f"Failed to update task {task_id}: {reason}"
         super().__init__(self.message)
 
+
 class TaskDeleteError(TaskFlowException):
     def __init__(self, task_id, reason):
         self.task_id = task_id

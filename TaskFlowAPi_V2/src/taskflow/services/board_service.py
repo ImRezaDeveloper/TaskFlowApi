@@ -15,9 +15,14 @@ from src.taskflow.crud.board_repository import (
     get_task_by_id_in_board_db,
     update_board_db,
 )
-from src.taskflow.exceptions.board import BoardNotFoundError, BoardPermissionDenied, BoardCreationError, BoardAlreadyExistError
-from src.taskflow.exceptions.user import UserMustBeLoggedIn
+from src.taskflow.exceptions.board import (
+    BoardAlreadyExistError,
+    BoardCreationError,
+    BoardNotFoundError,
+    BoardPermissionDenied,
+)
 from src.taskflow.exceptions.task import TaskNotFoundError, TasksOfBoardsNotFound
+from src.taskflow.exceptions.user import UserMustBeLoggedIn
 from src.taskflow.models.boards import Board
 from src.taskflow.models.tasks import Task
 from src.taskflow.schemas.contract.board_schema import BoardUpdate
@@ -40,7 +45,7 @@ async def create_board_service(db, board_data, current_user_id: UUID):
 
         if existing_board:
             raise BoardAlreadyExistError(board.name, current_user_id)
-        
+
         created_board = await create_board_db(db, board)
 
         logger.info(
@@ -59,6 +64,7 @@ async def create_board_service(db, board_data, current_user_id: UUID):
             exc_info=True,
         )
         raise BoardCreationError(str(e))
+
 
 async def get_all_boards_service(db, current_user_id: UUID):
     logger.info("get_all_boards_started", current_user_id=str(current_user_id))
@@ -268,14 +274,12 @@ async def create_task_service_board(
 async def get_tasks_by_board_id_service(
     db: AsyncSession,
     board_id: UUID,
-    task_id: UUID,
     current_user_id: UUID,
 ):
     logger.info(
         "get_tasks_in_board_started",
         user_id=str(current_user_id),
         board_id=str(board_id),
-        task_id=str(task_id)
     )
 
     try:
@@ -286,7 +290,6 @@ async def get_tasks_by_board_id_service(
                 "get_tasks_in_board_failed",
                 user_id=str(current_user_id),
                 board_id=str(board_id),
-                task_id=str(task_id),
                 reason="board_not_found",
             )
 
@@ -312,13 +315,12 @@ async def get_tasks_by_board_id_service(
                 "get_tasks_in_board_failed",
                 user_id=str(current_user_id),
                 board_id=str(board_id),
-                task_id=str(task_id),
                 board_owner_id=str(board.owner_id),
                 reason="unauthorized",
             )
 
-            raise TasksOfBoardsNotFound(board_id, str(e))
-        
+            raise TasksOfBoardsNotFound(board_id)
+
         logger.info(
             "get_tasks_in_board_success",
             user_id=str(current_user_id),
@@ -327,7 +329,12 @@ async def get_tasks_by_board_id_service(
         )
 
         return tasks
-    except (TaskNotFoundError, TasksOfBoardsNotFound, BoardNotFoundError, BoardPermissionDenied):
+    except (
+        TaskNotFoundError,
+        TasksOfBoardsNotFound,
+        BoardNotFoundError,
+        BoardPermissionDenied,
+    ):
         raise
     except Exception:
         logger.error()

@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.taskflow.services.task_service import get_board_tasks_service
 from src.taskflow.db.database import get_db
 from src.taskflow.models.users import User
 from src.taskflow.schemas.contract.board_schema import (
@@ -94,12 +95,14 @@ async def create_task_in_board(
     response_model=list[TaskResponse],
     status_code=status.HTTP_200_OK,
 )
-async def get_tasks_in_board(
+async def get_board_tasks(
     board_id: UUID,
+    skip: int = 0,
+    limit: int = 100,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return await get_tasks_by_board_id_service(db, board_id, current_user.id)
+    return await get_board_tasks_service(db, board_id, current_user.id, skip, limit)
 
 
 @router.delete("/{board_id}/task", status_code=status.HTTP_204_NO_CONTENT)
