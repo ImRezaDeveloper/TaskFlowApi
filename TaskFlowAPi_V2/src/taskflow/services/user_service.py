@@ -6,6 +6,7 @@ from src.taskflow.core.loggin import logger
 from src.taskflow.crud.user_repository import (
     create_user_db,
     delete_user_db,
+    get_user_by_email,
     get_user_by_name,
     get_users_db,
     update_user_db,
@@ -16,6 +17,7 @@ from src.taskflow.exceptions.user import (
     EmailAlreadyExistError,
     UserAlreadyExistError,
     UserCreationError,
+    UserDeleteError,
     UserNotFoundError,
 )
 from src.taskflow.models.users import User
@@ -84,6 +86,10 @@ async def create_user(
             username, email, hashed_password, full_name, is_active, is_verified, db
         )
 
+        # Transaction
+        await db.commit()
+        await db.refresh(new_user)
+
         logger.info(
             "create_user_success",
             user_id=str(new_user.id),
@@ -97,6 +103,7 @@ async def create_user(
         raise
 
     except Exception as e:
+        await db.rollback()
         logger.error(
             "create_user_error",
             username=username,
@@ -105,6 +112,11 @@ async def create_user(
             exc_info=True,
         )
         raise UserCreationError(username, email, str(e))
+
+
+from uuid import UUID
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.taskflow.exceptions.user import UserNotFoundError, UserUpdateError
 
 
 async def update_user(
@@ -118,23 +130,62 @@ async def update_user(
         update_fields=list(user_data.model_dump(exclude_unset=True).keys()),
     )
 
-    user = await get_user_by_id(user_id, db)
+    try:
+        user = await get_user_by_id(db, user_id)
 
-    if not user:
-        logger.warning(
-            "update_user_failed", user_id=str(user_id), reason="user_not_found"
+        if not user:
+            logger.warning(
+                "update_user_failed", user_id=str(user_id), reason="user_not_found"
+            )
+            raise UserNotFoundError(user_id)
+
+        if user_data.email and user_data.email != user.email:
+            existing_user = await get_user_by_email(db, user_data.email)
+            if existing_user:
+                logger.warning(
+                    "update_user_failed",
+                    user_id=str(user_id),
+                    email=user_data.email,
+                    reason="email_already_exists",
+                )
+                raise EmailAlreadyExistError("email", user_data.email)
+
+        if user_data.username and user_data.username != user.username:
+            existing_user = await get_user_by_name(db, user_data.username)
+            if existing_user:
+                logger.warning(
+                    "update_user_failed",
+                    user_id=str(user_id),
+                    username=user_data.username,
+                    reason="username_already_exists",
+                )
+                raise UserAlreadyExistError("username", user_data.username)
+
+        updated_user = await update_user_db(db, user, user_data)
+
+        await db.commit()
+        await db.refresh(updated_user)
+
+        logger.info(
+            "update_user_success",
+            user_id=str(user_id),
+            updated_fields=list(user_data.model_dump(exclude_unset=True).keys()),
         )
-        raise UserNotFoundError(user_id)
 
-    updated_user = await update_user_db(db, user, user_data)
+        return updated_user
 
-    logger.info(
-        "update_user_success",
-        user_id=str(user_id),
-        updated_fields=list(user_data.model_dump(exclude_unset=True).keys()),
-    )
+    except (UserNotFoundError, UserAlreadyExistError):
+        raise
 
-    return updated_user
+    except Exception as e:
+        await db.rollback()
+        logger.error(
+            "update_user_error",
+            user_id=str(user_id),
+            error=str(e),
+            exc_info=True,
+        )
+        raise UserUpdateError(user_id, str(e))
 
 
 async def delete_user(
@@ -142,17 +193,30 @@ async def delete_user(
     db: AsyncSession,
 ):
     logger.info("delete_user_started", user_id=str(user_id))
+    try:
+        user = await get_user_by_id(user_id, db)
 
-    user = await get_user_by_id(user_id, db)
+        if not user:
+            logger.warning(
+                "delete_user_failed", user_id=str(user_id), reason="user_not_found"
+            )
+            raise UserNotFoundError(user_id)
 
-    if not user:
-        logger.warning(
-            "delete_user_failed", user_id=str(user_id), reason="user_not_found"
+        await delete_user_db(db, user_id)
+
+        await db.commit()
+
+        logger.info("delete_user_success", user_id=str(user_id))
+
+        return {"message": "User deleted successfully"}
+    except (UserNotFoundError):
+        raise
+    except Exception as e:
+        await db.rollback()
+        logger.error(
+            "delete_user_error",
+            user_id=str(user_id),
+            error=str(e),
+            exc_info=True,
         )
-        raise UserNotFoundError(user_id)
-
-    deleted_user = await delete_user_db(db, user_id)
-
-    logger.info("delete_user_success", user_id=str(user_id))
-
-    return deleted_user
+        raise UserDeleteError(user_id, str(e))

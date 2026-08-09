@@ -10,6 +10,11 @@ class UserNotFoundError(TaskFlowException):
         self.user_id = user_id
         super().__init__(f"user {user_id} does not exists")
 
+class UserDeleteError(TaskFlowException):
+    def __init__(self, user_id: UUID, reason: str):
+        self.user_id = user_id
+        self.reason = reason
+        super().__init__(f"Falied to delete user {user_id}", reason)
 
 class EmailAlreadyExistError(TaskFlowException):
     def __int__(self, email: EmailStr):

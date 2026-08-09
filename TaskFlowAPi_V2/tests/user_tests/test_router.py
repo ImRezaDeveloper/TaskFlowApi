@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from fastapi.testclient import TestClient
 
 from src.taskflow.main import app
@@ -8,10 +10,10 @@ client = TestClient(app)
 # def test_create_user_success(client):
 
 #     user_data = {
-#         "username": "shakiba",
+#         "username": f"fardad",
 #         "email": f"{uuid4().hex[:8]}@test.com",
 #         "password": "StrongPassword123!",
-#         "full_name": "shakiba",
+#         "full_name": "fardad",
 #         "is_active": True,
 #         "is_verified": False
 #     }
@@ -25,6 +27,44 @@ client = TestClient(app)
 #     print("Response JSON:", response.json())
 
 #     assert response.status_code == 201
+
+
+def test_create_user_fail(client):
+
+    # username = f"fardad{uuid4().hex[:8]}"
+
+    user_data = {
+        "username": "fardad746b3597",
+        "email": f"{uuid4().hex[:8]}@test.com",
+        "password": "StrongPassword123!",
+        "full_name": "fardad",
+        "is_active": True,
+        "is_verified": False,
+    }
+
+    response = client.post("/users/", json=user_data)
+
+    print("Status Code:", response.status_code)
+    print("Response JSON:", response.json())
+
+    assert response.status_code == 201
+
+    dublicate_user_data = {
+        "username": "fardad746b8597",
+        "email": f"{uuid4().hex[:8]}@test.com",
+        "password": "StrongPassword123!",
+        "full_name": "fardad",
+        "is_active": True,
+        "is_verified": False,
+    }
+
+    response = client.post("/users/", json=dublicate_user_data)
+
+    print("Status Code:", response.status_code)
+    print("Response JSON:", response.json())
+
+    assert response.status_code == 409
+
 
 # successfull test!
 # def test_get_user_success(client):

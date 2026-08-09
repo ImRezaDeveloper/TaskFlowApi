@@ -28,6 +28,7 @@ async def create_user_db(
     is_verified: bool,
     db: AsyncSession,
 ) -> User:
+
     new_user = User(
         username=username,
         email=email,
@@ -38,8 +39,8 @@ async def create_user_db(
     )
 
     db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
+    # await db.commit()
+    # await db.refresh(new_user)
 
     return new_user
 
@@ -64,8 +65,8 @@ async def update_user_db(
     for key, value in user_data.model_dump(exclude_unset=True).items():
         setattr(user, key, value)
 
-    await db.commit()
-    await db.refresh(user)
+    # await db.commit()
+    # await db.refresh(user)
 
     return user
 
@@ -77,7 +78,7 @@ async def delete_user_db(db: AsyncSession, user_id: UUID) -> User | None:
         return None
 
     await db.delete(user)
-    await db.commit()
+    # await db.commit()
 
     return user
 

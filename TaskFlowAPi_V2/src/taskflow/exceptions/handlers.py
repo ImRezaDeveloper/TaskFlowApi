@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from src.taskflow.exceptions.user import UserAlreadyExistError
 from src.taskflow.exceptions.auth_user import (
     CouldNotValidateCredentialsError,
     EmailorPasswordWrongError,
@@ -96,6 +97,14 @@ async def could_not_validate_credentials_error_handler(
     )
 
 
+# UserAlreadyExistError
+async def user_already_exist_error_handler(
+    request: Request, exc: UserAlreadyExistError
+):
+
+    return JSONResponse(status_code=409, content={"detail": "user already exists"})
+
+
 def register_exception_handlers(app: FastAPI):
 
     app.add_exception_handler(
@@ -117,3 +126,4 @@ def register_exception_handlers(app: FastAPI):
     app.add_exception_handler(
         CouldNotValidateCredentialsError, could_not_validate_credentials_error_handler
     )
+    app.add_exception_handler(UserAlreadyExistError, user_already_exist_error_handler)
