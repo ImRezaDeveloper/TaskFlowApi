@@ -10,11 +10,13 @@ class UserNotFoundError(TaskFlowException):
         self.user_id = user_id
         super().__init__(f"user {user_id} does not exists")
 
+
 class UserDeleteError(TaskFlowException):
     def __init__(self, user_id: UUID, reason: str):
         self.user_id = user_id
         self.reason = reason
         super().__init__(f"Falied to delete user {user_id}", reason)
+
 
 class EmailAlreadyExistError(TaskFlowException):
     def __int__(self, email: EmailStr):
@@ -42,4 +44,12 @@ class UserMustBeLoggedIn(TaskFlowException):
         self.user_id = current_user_id
         self.reason = reason
         self.message = "You must be logged in to create a board"
+        super().__init__(self.message)
+
+
+class UserUpdateError(TaskFlowException):
+    def __init__(self, user_id, reason):
+        self.user_id = user_id
+        self.reason = reason
+        self.message = f"Failed to update user {user_id}: {reason}"
         super().__init__(self.message)

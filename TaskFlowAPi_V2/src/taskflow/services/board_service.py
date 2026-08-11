@@ -21,11 +21,12 @@ from src.taskflow.exceptions.board import (
     BoardNotFoundError,
     BoardPermissionDenied,
 )
-from src.taskflow.exceptions.task import TaskNotFoundError, TasksOfBoardsNotFound
+from src.taskflow.exceptions.task import TaskCreationError, TaskNotFoundError, TasksOfBoardsNotFound
 from src.taskflow.exceptions.user import UserMustBeLoggedIn
 from src.taskflow.models.boards import Board
 from src.taskflow.models.tasks import Task
-from src.taskflow.schemas.contract.board_schema import BoardUpdate
+from src.taskflow.schemas.contract.board_schema import BoardUpdate, BoardCreate
+from src.taskflow.schemas.contract.task_schema import TaskCreate
 
 
 async def create_board_service(db, board_data, current_user_id: UUID):
@@ -402,3 +403,94 @@ async def delete_task_by_id_board_service(
     )
 
     return {"message": "Task deleted successfully"}
+
+async def create_task_service_flush_board(
+    board_data: BoardCreate,
+    task_data: TaskCreate,
+    db: AsyncSession,
+    current_user_id: UUID,
+):
+    """
+        this method created for test atomicity and rollback transaction
+    """
+    
+    logger.info(
+        "create_task_in_board_started",
+        user_id=str(current_user_id),
+        board_name=board_data.name,
+        title=task_data.title,
+    )
+
+    try:
+        new_board = Board(
+            name=board_data.name,
+            description=board_data.description,
+            owner_id=current_user_id,
+        )
+
+        existing_board = await get_board_by_name_db(db, new_board.name, current_user_id)
+        if existing_board:
+            logger.warning(
+                "create_task_in_board_failed",
+                user_id=str(current_user_id),
+                board_name=board_data.name,
+                reason="board_name_already_exists",
+            )
+            raise BoardAlreadyExistError(new_board.name, current_user_id)
+
+        db.add(new_board)
+        # await create_board_db(db, new_board)
+
+        await db.flush()
+        await db.refresh(new_board)
+
+        logger.info(
+            "board_created_for_task",
+            board_id=str(new_board.id),
+            user_id=str(current_user_id),
+            name=board_data.name,
+        )
+
+        task = Task(
+            title=task_data.title,
+            description=task_data.description,
+            status=task_data.status,
+            priority=task_data.priority,
+            due_date=task_data.due_date,
+            user_id=current_user_id,
+            board_id=new_board.id,
+        )
+
+        db.add(task)
+        # await create_task_db(db, task)
+
+        await db.flush()
+        await db.refresh(task)
+
+        logger.info(
+            "create_task_in_board_success",
+            task_id=str(task.id),
+            board_id=str(new_board.id),
+            user_id=str(current_user_id),
+            title=task_data.title,
+        )
+
+        await db.commit()
+
+        return task
+
+    except (BoardAlreadyExistError):
+        raise
+
+    except Exception as e:
+        await db.rollback()
+        logger.error(
+            "create_task_board_error",
+            user_id=str(current_user_id),
+            board_name=board_data.name,
+            title=task_data.title,
+            error=str(e),
+            transaction_status="rolled_back",
+            exc_info=True,
+        )
+        raise TaskCreationError(str(e))

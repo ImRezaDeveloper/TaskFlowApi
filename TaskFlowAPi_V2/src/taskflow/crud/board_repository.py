@@ -49,8 +49,8 @@ async def delete_board_db(db: AsyncSession, board: Board):
 
 async def create_task_db(db: AsyncSession, task: Task):
     db.add(task)
-    await db.commit()
-    await db.refresh(task)
+    # await db.commit()
+    # await db.refresh(task)
     return task
 
 

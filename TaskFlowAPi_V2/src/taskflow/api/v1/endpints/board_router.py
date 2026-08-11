@@ -15,6 +15,7 @@ from src.taskflow.services.auth_service import get_current_user
 from src.taskflow.services.board_service import (
     create_board_service,
     create_task_service_board,
+    create_task_service_flush_board,
     delete_board_service,
     delete_task_by_id_board_service,
     get_all_boards_service,
@@ -89,6 +90,19 @@ async def create_task_in_board(
         current_user_id=current_user.id,
     )
 
+@router.post(
+    "/{board_id}/tasks/new",
+    response_model=TaskResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_task_flush_board(
+    board_data: BoardCreate,
+    task_data: TaskCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    return await create_task_service_flush_board(board_data, task_data, db, current_user.id)
 
 @router.get(
     "/{board_id}/tasks",

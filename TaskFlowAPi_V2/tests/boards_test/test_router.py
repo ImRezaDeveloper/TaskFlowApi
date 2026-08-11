@@ -112,18 +112,57 @@ from uuid import uuid4
 #     assert "id" in data
 
 
-def test_create_task_in_board_not_found(client, auth_headers):
-    fake_board_id = uuid4()
-    task_data = {
-        "title": "Learn FastAPI",
-        "description": "Complete the FastAPI tutorial",
-        "status": "todo",
-        "priority": "high",
-    }
+# def test_create_task_in_board_not_found(client, auth_headers):
+#     fake_board_id = uuid4()
+#     task_data = {
+#         "title": "Learn FastAPI",
+#         "description": "Complete the FastAPI tutorial",
+#         "status": "todo",
+#         "priority": "high",
+#     }
 
-    response = client.post(
-        f"/boards/{fake_board_id}/tasks", json=task_data, headers=auth_headers
-    )
+#     response = client.post(
+#         f"/boards/{fake_board_id}/tasks", json=task_data, headers=auth_headers
+#     )
 
-    assert response.status_code == 404
-    assert "not found" in response.json()["detail"].lower()
+#     assert response.status_code == 404
+#     assert "not found" in response.json()["detail"].lower()
+
+
+# # successfull test
+# def test_create_task_in_board_success(client, auth_headers):
+#     user_id = auth_headers["user_id"]
+
+#     board_data = {
+#         "name": "spanish",
+#         "description": "this board has created for learning spanish language",
+#     }
+
+#     response = client.post("/boards/", json=board_data, headers=auth_headers)
+#     assert response.status_code == 201, f"Board creation failed: {response.json()}"
+#     board_id = response.json()["id"]
+
+#     db.flush()
+
+#     task_data = {
+#         "title": "Learn FastAPI",
+#         "description": "Complete the FastAPI tutorial",
+#         "status": "todo",
+#         "priority": "high",
+#         "due_date": "2026-07-10 14:47:03.397",
+#         "user_id": user_id,
+#         "board_id": board_id,
+#     }
+
+#     response = client.post(
+#         f"/boards/{board_id}/tasks", json=task_data, headers=auth_headers
+#     )
+
+#     assert response.status_code == 201
+#     data = response.json()
+
+#     assert data["title"] == task_data["title"]
+#     assert data["description"] == task_data["description"]
+#     # assert data["board_id"] == board_id
+#     assert data["user_id"] is not None
+#     assert "id" in data

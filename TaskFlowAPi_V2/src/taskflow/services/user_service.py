@@ -19,6 +19,7 @@ from src.taskflow.exceptions.user import (
     UserCreationError,
     UserDeleteError,
     UserNotFoundError,
+    UserUpdateError,
 )
 from src.taskflow.models.users import User
 from src.taskflow.schemas.contract.user_schema import UserUpdate
@@ -114,11 +115,6 @@ async def create_user(
         raise UserCreationError(username, email, str(e))
 
 
-from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.taskflow.exceptions.user import UserNotFoundError, UserUpdateError
-
-
 async def update_user(
     user_id: UUID,
     user_data: UserUpdate,
@@ -209,7 +205,7 @@ async def delete_user(
         logger.info("delete_user_success", user_id=str(user_id))
 
         return {"message": "User deleted successfully"}
-    except (UserNotFoundError):
+    except UserNotFoundError:
         raise
     except Exception as e:
         await db.rollback()
