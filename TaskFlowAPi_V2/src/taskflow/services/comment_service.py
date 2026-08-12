@@ -19,6 +19,11 @@ from src.taskflow.exceptions.comment import (
 
 # from src.taskflow.core.loggin import setup_logging
 from src.taskflow.schemas.contract.comment_schema import CommentCreate, CommentUpdate
+from src.taskflow.services.board_service import get_board_by_id_service
+from src.taskflow.exceptions.board import BoardNotFoundError, BoardPermissionDenied
+from src.taskflow.services.task_service import get_task_by_id_service
+from src.taskflow.exceptions.task import TaskNotFoundError, TaskPermissionDenied
+from src.taskflow.models.comments import Comment
 
 
 async def create_comment_service(
@@ -26,18 +31,20 @@ async def create_comment_service(
     comment_create: CommentCreate,
     current_user_id: UUID,
     task_id: UUID,
-    board_id: UUID,
-):
+    # board_id: UUID,
+) -> Comment:
     logger.info(
         "create_comment_started",
         user_id=str(current_user_id),
         task_id=str(task_id),
-        board_id=str(board_id),
+        # board_id=str(board_id),
     )
 
     try:
+        await get_task_by_id_service(db, task_id, current_user_id)
+
         new_comment = await create_comment_db(
-            db, comment_create, current_user_id, task_id, board_id
+            db, comment_create, current_user_id, task_id
         )
         logger.info(
             "create_comment_completed",
@@ -55,7 +62,7 @@ async def create_comment_service(
             "create_comment_error",
             user_id=str(current_user_id),
             task_id=str(task_id),
-            board_id=str(board_id),
+            # board_id=str(board_id),
             error=str(e),
             exc_info=True,
         )

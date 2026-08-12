@@ -17,10 +17,12 @@ from src.taskflow.services.comment_service import (
     update_comment_service,
 )
 
-router = APIRouter(prefix="/comments", tags=["Comments"])
+router = APIRouter(prefix="/tasks/{task_id}/comments", tags=["Comments"])
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/boards/{board_id}/tasks/{task_id}/comments/", status_code=status.HTTP_201_CREATED
+)
 async def create_comment(
     task_id: UUID,
     board_id: UUID,

@@ -37,3 +37,9 @@ class Board(Base):
     comments = relationship(
         "Comment", back_populates="board", cascade="all, delete-orphan"
     )
+
+    memberships: Mapped[list["BoardMembership"]] = relationship(
+        "BoardMembership",
+        back_populates="board",
+        cascade="all, delete-orphan"
+    )

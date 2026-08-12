@@ -18,6 +18,8 @@ from src.taskflow.services.task_service import (
     get_task_by_id_service,
     update_task_service,
 )
+from src.taskflow.schemas.contract.comment_schema import CommentCreate
+from src.taskflow.services.comment_service import create_comment_service
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -57,3 +59,14 @@ async def delete_task(
     current_user: User = Depends(get_current_user),
 ):
     return await delete_task_service(db, task_id, current_user.id)
+
+
+@router.post("/{task_id}/comments/", status_code=status.HTTP_201_CREATED)
+async def create_comment(
+    task_id: UUID,
+    # board_id: UUID,
+    comment_data: CommentCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return await create_comment_service(db, comment_data, current_user.id, task_id)

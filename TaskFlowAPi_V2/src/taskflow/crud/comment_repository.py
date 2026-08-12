@@ -15,13 +15,13 @@ async def create_comment_db(
     comment_data: CommentCreate,
     author_id: UUID | None = None,
     task_id: UUID | None = None,
-    board_id: UUID | None = None,
+    # board_id: UUID | None = None,
 ) -> Comment:
     new_comment = Comment(
         **comment_data.model_dump(),
         author_id=author_id,
         task_id=task_id,
-        board_id=board_id,
+        # board_id=board_id,
     )
 
     db.add(new_comment)

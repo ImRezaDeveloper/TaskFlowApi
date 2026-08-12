@@ -90,6 +90,7 @@ async def create_task_in_board(
         current_user_id=current_user.id,
     )
 
+
 @router.post(
     "/{board_id}/tasks/new",
     response_model=TaskResponse,
@@ -99,10 +100,13 @@ async def create_task_flush_board(
     board_data: BoardCreate,
     task_data: TaskCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
 
-    return await create_task_service_flush_board(board_data, task_data, db, current_user.id)
+    return await create_task_service_flush_board(
+        board_data, task_data, db, current_user.id
+    )
+
 
 @router.get(
     "/{board_id}/tasks",

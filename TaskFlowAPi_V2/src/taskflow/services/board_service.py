@@ -21,7 +21,11 @@ from src.taskflow.exceptions.board import (
     BoardNotFoundError,
     BoardPermissionDenied,
 )
-from src.taskflow.exceptions.task import TaskCreationError, TaskNotFoundError, TasksOfBoardsNotFound
+from src.taskflow.exceptions.task import (
+    TaskCreationError,
+    TaskNotFoundError,
+    TasksOfBoardsNotFound,
+)
 from src.taskflow.exceptions.user import UserMustBeLoggedIn
 from src.taskflow.models.boards import Board
 from src.taskflow.models.tasks import Task
@@ -404,6 +408,7 @@ async def delete_task_by_id_board_service(
 
     return {"message": "Task deleted successfully"}
 
+
 async def create_task_service_flush_board(
     board_data: BoardCreate,
     task_data: TaskCreate,
@@ -411,9 +416,9 @@ async def create_task_service_flush_board(
     current_user_id: UUID,
 ):
     """
-        this method created for test atomicity and rollback transaction
+    this method created for test atomicity and rollback transaction
     """
-    
+
     logger.info(
         "create_task_in_board_started",
         user_id=str(current_user_id),
@@ -479,7 +484,7 @@ async def create_task_service_flush_board(
 
         return task
 
-    except (BoardAlreadyExistError):
+    except BoardAlreadyExistError:
         raise
 
     except Exception as e:

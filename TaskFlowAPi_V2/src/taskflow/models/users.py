@@ -41,6 +41,12 @@ class User(Base):
     comments: Mapped[list["Comment"]] = relationship(
         back_populates="author", cascade="all, delete-orphan"
     )
+    board_memberships: Mapped[list["BoardMembership"]] = relationship(
+        "BoardMembership",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+    
 
     # def __repr__(self) -> str:
     #     return f"<User {self.username}>"
